@@ -13,7 +13,7 @@ const CARGA_ROWS = [
   {c:"75% DE CARGA", t:"25"},
   {c:"90% DE CARGA", t:"25"},
   {c:"100% DE CARGA (LTP)", t:"125"},
-  {c:"CARGA SÚBITA 0→100%", t:"—", hl:true},
+  {c:"CARGA SÚBITA 0-100%", t:"—", hl:true},
   {c:"RETORNO 75% CARGA", t:"25"},
   {c:"RETORNO 50% CARGA", t:"25"},
   {c:"RETORNO 25% CARGA", t:"25"},
@@ -289,13 +289,25 @@ function generarPDF(){
     doc.setFillColor(255,255,255);
     doc.rect(0,0,W,20,'F');
     doc.setDrawColor(...AZUL); doc.setLineWidth(0.6); doc.rect(4,3,W-8,16);
+    // --- Logo Sudmar: 3 circulos dibujados + texto ---
+    doc.setFillColor(...AZUL);
+    doc.circle(11, 10, 1.6, 'F');
+    doc.circle(15.5, 10, 1.6, 'F');
+    doc.circle(20, 10, 1.6, 'F');
     doc.setTextColor(...AZUL); doc.setFont('helvetica','bold');
-    doc.setFontSize(15); doc.text('●●● Sudmar', 10, 12);
-    doc.setFontSize(7); doc.setTextColor(120,120,120); doc.text('Energy', 34, 15);
-    doc.setFontSize(13); doc.setTextColor(60,60,60); doc.text('PRETTL', W/2-12, 12);
-    doc.setFontSize(6); doc.text('energy', W/2-2, 15);
-    doc.setFontSize(13); doc.setTextColor(...ROJO); doc.text('◄ ENDRESS', W-52, 12);
-    doc.setFontSize(6); doc.setTextColor(120,120,120); doc.text('Together, always on.', W-52, 16);
+    doc.setFontSize(15); doc.text('Sudmar', 24, 12);
+    doc.setFontSize(7); doc.setTextColor(120,120,120); doc.text('Energy', 42, 15);
+    // --- Logo Prettl (centro) ---
+    doc.setFontSize(13); doc.setTextColor(60,60,60); doc.setFont('helvetica','bold');
+    doc.text('PRETTL', W/2-12, 12);
+    doc.setFontSize(6); doc.text('energy', W/2-1, 15);
+    // --- Logo Endress: triangulo dibujado + texto ---
+    doc.setFillColor(...ROJO);
+    doc.triangle(W-56, 9, W-56, 13, W-52.5, 11, 'F');
+    doc.setFontSize(13); doc.setTextColor(...ROJO); doc.setFont('helvetica','bold');
+    doc.text('ENDRESS', W-50, 12);
+    doc.setFontSize(6); doc.setTextColor(120,120,120); doc.setFont('helvetica','normal');
+    doc.text('Together, always on.', W-50, 16);
   }
 
   function bandaTitulo(y,txt,color){
@@ -312,7 +324,7 @@ function generarPDF(){
   bandaTitulo(30,'DATOS GENERALES DEL EQUIPO',AZUL2);
   const gd = [
     ['Cliente / Sitio:', g('cliente'), 'Frecuencia Nominal (Hz):', g('frecuencia')],
-    ['No. de Reporte:', g('reporte'), 'Corriente Nominal Cosφ0.8 (A):', g('corriente')],
+    ['No. de Reporte:', g('reporte'), 'Corriente Nominal Cos 0.8 (A):', g('corriente')],
     ['Fecha de Prueba:', g('fecha'), 'Motor (Marca / Modelo):', g('motor')],
     ['Técnico Responsable:', g('tecnico'), 'Alternador:', g('alternador')],
     ['No. de Serie Generador:', g('serie'), 'Controlador / Panel:', g('controlador')],
@@ -337,7 +349,7 @@ function generarPDF(){
   let y = doc.lastAutoTable.finalY + 3;
   doc.setFillColor(...AZUL2); doc.rect(4,y,W-8,6,'F');
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
-  doc.text('PRUEBAS CON CARGA – BANCO RESISTIVO (Cosφ=1)  |  Tolerancias: Voltaje ±5% | Frecuencia ±2% | Temp. agua ≤95°C | Presión aceite ≥2.0 bar', W/2, y+4, {align:'center'});
+  doc.text('PRUEBAS CON CARGA – BANCO RESISTIVO (FP=1)  |  Tolerancias: Voltaje ±5% | Frecuencia ±2% | Temp. agua max 95°C | Presión aceite min 2.0 bar', W/2, y+4, {align:'center'});
 
   const cargaHead = [['CONDICIÓN DE PRUEBA','TIEMPO\nPASO (s)','VOLTAJE\nL-L (V)','CORR.\nL1 (A)','CORR.\nL2 (A)','CORR.\nL3 (A)','POTENCIA\n(kW)','FREC.\n(Hz)','RPM','PRESIÓN\nACEITE (bar)','TEMP.\nAGUA (°C)','OBSERVACIONES']];
   const cargaBody = CARGA_ROWS.map((r,i)=>[
@@ -413,9 +425,9 @@ function generarPDF(){
   doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(7);
   doc.text('CRITERIOS DE ACEPTACIÓN – ISO 8528-5', colR+colRW/2, yR+3.5, {align:'center'});
   const critBody=[
-    ['Caída máx. voltaje transitorio:','≤ -15% del nominal'],
+    ['Caída máx. voltaje transitorio:','max -15% del nominal'],
     ['Recuperación de voltaje:','< 3 s al ±3% nominal'],
-    ['Caída máx. de frecuencia:','≤ -10% del nominal'],
+    ['Caída máx. de frecuencia:','max -10% del nominal'],
     ['Recuperación de frecuencia:','< 5 s al ±1 Hz'],
     ['RESULTADO CARGA SÚBITA:', state.dict.subita||'—'],
   ];
