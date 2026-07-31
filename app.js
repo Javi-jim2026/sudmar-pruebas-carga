@@ -282,6 +282,11 @@ const firmaN = k => val(`[data-firma="${k}-nombre"]`);
 //   GENERACIÓN DEL PDF · Layout idéntico, 2 páginas horizontal
 // ============================================================
 function generarPDF(){
+ try{
+  if(!window.jspdf || !window.jspdf.jsPDF){
+    alert('La librería del PDF no cargó. Verifica tu conexión a internet e intenta de nuevo (sin recargar pierdes datos: revisa tu señal y vuelve a tocar Generar PDF).');
+    return;
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
   const W = doc.internal.pageSize.getWidth();   // 297
@@ -498,9 +503,29 @@ function generarPDF(){
     doc.text(f.k?'Nombre / Firma':'Fecha y sello', x+colW/2, boxY+25.5, {align:'center'});
   });
 
-  // ---- Guardar ----
+  // ---- Guardar / abrir PDF (robusto para móvil) ----
   const nombreArch = `Reporte_Pruebas_Carga_${(g('reporte')||g('cliente')||'Sudmar').replace(/[^\w\-]/g,'_')}.pdf`;
-  doc.save(nombreArch);
+  const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(esMovil){
+    // En móvil doc.save() a veces no dispara; abrir el PDF en visor es más confiable
+    try{
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=nombreArch;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>{ window.open(url,'_blank'); }, 300);
+      setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    }catch(e){
+      try{ doc.save(nombreArch); }catch(e2){ alert('No se pudo generar el PDF: '+(e2.message||e2)); }
+    }
+  }else{
+    try{ doc.save(nombreArch); }catch(e){ alert('No se pudo generar el PDF: '+(e.message||e)); }
+  }
+ }catch(err){
+   alert('Error al generar el PDF: '+(err && err.message ? err.message : err)+'\n\nTus datos siguen guardados. Intenta de nuevo.');
+   console.error('generarPDF error:', err);
+ }
 }
 
 // ============================================================
