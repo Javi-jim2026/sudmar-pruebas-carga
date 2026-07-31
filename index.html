@@ -81,8 +81,13 @@
 </head>
 <body>
 <header>
-  <h1>Reporte de Pruebas con Carga</h1>
-  <div class="sub">Grupo Electrógeno · Sudmar Energy</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <div>
+      <h1>Reporte de Pruebas con Carga</h1>
+      <div class="sub">Grupo Electrógeno · Sudmar Energy</div>
+    </div>
+    <button onclick="nuevoReporte()" style="flex:0 0 auto;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600">Nuevo</button>
+  </div>
 </header>
 
 <div class="progress" id="progress"></div>
