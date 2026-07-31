@@ -162,22 +162,65 @@ function buildFirmas(){
 // ---------- FIRMAS (canvas) ----------
 function initSig(key){
   const canvas = document.querySelector(`canvas[data-sig="${key}"]`);
-  const ratio = window.devicePixelRatio||1;
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width*ratio; canvas.height = 130*ratio;
   const ctx = canvas.getContext('2d');
-  ctx.scale(ratio,ratio); ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#1a3b6e';
-  let drawing=false, empty=true;
-  const pos = e=>{const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};};
-  const start=e=>{drawing=true;empty=false;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();};
-  const move=e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();};
-  const end=()=>{drawing=false;};
-  canvas.addEventListener('mousedown',start);canvas.addEventListener('mousemove',move);
-  canvas.addEventListener('mouseup',end);canvas.addEventListener('mouseout',end);
+  let drawing=false, empty=true, sized=false, lastX=0, lastY=0;
+
+  // Dimensiona el canvas SOLO cuando ya es visible (ancho > 0).
+  // Preserva el trazo existente al redimensionar.
+  function ensureSize(){
+    const rect = canvas.getBoundingClientRect();
+    if(rect.width===0) return false;            // aún oculto
+    const ratio = window.devicePixelRatio||1;
+    const targetW = Math.round(rect.width*ratio);
+    const targetH = Math.round(130*ratio);
+    if(canvas.width===targetW && canvas.height===targetH) return true; // ya dimensionado
+    let prev=null;
+    if(sized){ try{ prev = canvas.toDataURL('image/png'); }catch(e){} }
+    canvas.width = targetW; canvas.height = targetH;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(ratio,ratio);
+    ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#1a3b6e';
+    if(prev){ const img=new Image(); img.onload=()=>ctx.drawImage(img,0,0,rect.width,130); img.src=prev; }
+    sized=true;
+    return true;
+  }
+
+  const pos = e=>{
+    const r=canvas.getBoundingClientRect();
+    const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e;
+    return {x:t.clientX-r.left, y:t.clientY-r.top};
+  };
+  const start=e=>{
+    if(!ensureSize()) return;
+    drawing=true; empty=false;
+    const p=pos(e); lastX=p.x; lastY=p.y;
+    ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x+0.1,p.y+0.1); ctx.stroke();
+    e.preventDefault();
+  };
+  const move=e=>{
+    if(!drawing) return;
+    const p=pos(e);
+    ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke();
+    lastX=p.x; lastY=p.y;
+    e.preventDefault();
+  };
+  const end=e=>{ if(drawing){drawing=false; if(e)e.preventDefault();} };
+
+  canvas.addEventListener('mousedown',start);
+  canvas.addEventListener('mousemove',move);
+  canvas.addEventListener('mouseup',end);
+  canvas.addEventListener('mouseleave',end);
   canvas.addEventListener('touchstart',start,{passive:false});
   canvas.addEventListener('touchmove',move,{passive:false});
-  canvas.addEventListener('touchend',end);
-  sigPads[key]={canvas,isEmpty:()=>empty,clear:()=>{ctx.clearRect(0,0,canvas.width,canvas.height);empty=true;}};
+  canvas.addEventListener('touchend',end,{passive:false});
+  canvas.addEventListener('touchcancel',end,{passive:false});
+
+  sigPads[key]={
+    canvas,
+    isEmpty:()=>empty,
+    ensureSize,
+    clear:()=>{ctx.clearRect(0,0,canvas.width,canvas.height);empty=true;}
+  };
 }
 function clearSig(key){sigPads[key].clear();}
 
@@ -215,6 +258,10 @@ function showStep(n){
   else { next.textContent='Siguiente'; next.className='btn-next'; }
   window.scrollTo({top:0,behavior:'smooth'});
   current=n;
+  // Al entrar al paso de firmas, dimensiona los canvas (ya visibles)
+  if(n===STEPS.length-1){
+    setTimeout(()=>{ Object.values(sigPads).forEach(p=>p.ensureSize&&p.ensureSize()); }, 120);
+  }
 }
 function next(){ if(current<STEPS.length-1) showStep(current+1); else generarPDF(); }
 function prev(){ if(current>0) showStep(current-1); }
