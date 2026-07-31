@@ -219,6 +219,7 @@ function initSig(key){
     canvas,
     isEmpty:()=>empty,
     ensureSize,
+    markFilled:()=>{empty=false;},
     clear:()=>{ctx.clearRect(0,0,canvas.width,canvas.height);empty=true;}
   };
 }
@@ -490,9 +491,25 @@ function generarPDF(){
   firmaCols.forEach((f,i)=>{
     const x = 4 + i*colW;
     doc.setDrawColor(217,222,230); doc.rect(x,boxY,colW,boxH);
-    // imagen de firma
-    if(f.k && sigPads[f.k] && !sigPads[f.k].isEmpty()){
-      try{ doc.addImage(sigPads[f.k].canvas.toDataURL('image/png'),'PNG',x+2,boxY+1,colW-4,15); }catch(e){}
+    // imagen de firma: canvas actual -> _firmasGuardadas -> localStorage
+    if(f.k){
+      let sigData = null;
+      const pad = sigPads[f.k];
+      if(pad && !pad.isEmpty()){
+        try{ sigData = pad.canvas.toDataURL('image/png'); }catch(e){}
+      }
+      if(!sigData && window._firmasGuardadas && window._firmasGuardadas[f.k]){
+        sigData = window._firmasGuardadas[f.k];
+      }
+      if(!sigData){
+        try{
+          const ls = JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+          if(ls.firmas && ls.firmas[f.k]) sigData = ls.firmas[f.k];
+        }catch(e){}
+      }
+      if(sigData){
+        try{ doc.addImage(sigData,'PNG',x+2,boxY+1,colW-4,15); }catch(e){ console.error('firma '+f.k, e); }
+      }
     }
     doc.setTextColor(80,80,80); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
     const nombre = f.k ? firmaN(f.k) : (g('fecha')||'');
@@ -625,6 +642,7 @@ function pintarFirmasGuardadas(){
   Object.entries(window._firmasGuardadas).forEach(([k,dataURL])=>{
     const pad=sigPads[k]; if(!pad||!dataURL) return;
     pad.ensureSize&&pad.ensureSize();
+    pad.markFilled&&pad.markFilled();   // cuenta como no vacía para el PDF
     const ctx=pad.canvas.getContext('2d');
     const img=new Image();
     img.onload=()=>{
