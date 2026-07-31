@@ -260,7 +260,10 @@ function showStep(n){
   current=n;
   // Al entrar al paso de firmas, dimensiona los canvas (ya visibles)
   if(n===STEPS.length-1){
-    setTimeout(()=>{ Object.values(sigPads).forEach(p=>p.ensureSize&&p.ensureSize()); }, 120);
+    setTimeout(()=>{
+      Object.values(sigPads).forEach(p=>p.ensureSize&&p.ensureSize());
+      pintarFirmasGuardadas();
+    }, 120);
   }
 }
 function next(){ if(current<STEPS.length-1) showStep(current+1); else generarPDF(); }
@@ -500,6 +503,134 @@ function generarPDF(){
   doc.save(nombreArch);
 }
 
+// ============================================================
+//   AUTOGUARDADO (localStorage) · preserva datos y firmas
+// ============================================================
+const LS_KEY = 'sudmar_pruebas_carga_v1';
+let saveTimer = null;
+
+function recolectarEstado(){
+  const data = { campos:{}, segmentos:{}, dict:state.dict, firmas:{} };
+  // todos los inputs/textarea/select con id o data-*
+  document.querySelectorAll('input,textarea,select').forEach(el=>{
+    const key = el.id || el.dataset.carga && ('carga:'+el.dataset.carga)
+      || el.dataset.param && ('param:'+el.dataset.param)
+      || el.dataset.sub && ('sub:'+el.dataset.sub)
+      || el.dataset.firma && ('firma:'+el.dataset.firma);
+    if(key) data.campos[key] = el.value;
+  });
+  // segmentos (alarmas)
+  document.querySelectorAll('[data-seg]').forEach(s=>{
+    if(s.dataset.val) data.segmentos[s.dataset.seg] = s.dataset.val;
+  });
+  // firmas dibujadas (dataURL)
+  Object.keys(sigPads).forEach(k=>{
+    if(sigPads[k] && !sigPads[k].isEmpty()){
+      try{ data.firmas[k] = sigPads[k].canvas.toDataURL('image/png'); }catch(e){}
+    }
+  });
+  return data;
+}
+
+function guardar(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(recolectarEstado()));
+    mostrarGuardado();
+  }catch(e){}
+}
+function mostrarGuardado(){
+  let ind=document.getElementById('saveInd');
+  if(!ind){
+    ind=document.createElement('div');
+    ind.id='saveInd';
+    ind.style.cssText='position:fixed;bottom:96px;right:16px;background:#2e7d32;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;z-index:70;opacity:0;transition:opacity .3s;box-shadow:0 2px 6px rgba(0,0,0,.2)';
+    ind.textContent='✓ Guardado';
+    document.body.appendChild(ind);
+  }
+  ind.style.opacity='1';
+  clearTimeout(ind._t);
+  ind._t=setTimeout(()=>{ind.style.opacity='0';},1200);
+}
+function guardarDebounced(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(guardar, 400);
+}
+
+function restaurar(){
+  let raw;
+  try{ raw = localStorage.getItem(LS_KEY); }catch(e){ return; }
+  if(!raw) return;
+  let data; try{ data = JSON.parse(raw); }catch(e){ return; }
+
+  // campos
+  Object.entries(data.campos||{}).forEach(([key,val])=>{
+    let el=null;
+    if(key.startsWith('carga:')) el=document.querySelector(`[data-carga="${key.slice(6)}"]`);
+    else if(key.startsWith('param:')) el=document.querySelector(`[data-param="${key.slice(6)}"]`);
+    else if(key.startsWith('sub:')) el=document.querySelector(`[data-sub="${key.slice(4)}"]`);
+    else if(key.startsWith('firma:')) el=document.querySelector(`[data-firma="${key.slice(6)}"]`);
+    else el=document.getElementById(key);
+    if(el) el.value=val;
+  });
+  // segmentos
+  Object.entries(data.segmentos||{}).forEach(([seg,val])=>{
+    const cont=document.querySelector(`[data-seg="${seg}"]`);
+    if(cont){
+      cont.dataset.val=val;
+      const btn=[...cont.querySelectorAll('button')].find(b=>b.dataset.v===val);
+      if(btn){ const cls=val==='Sí'?'on-si':val==='No'?'on-no':val==='OK'?'on-ok':'on-falla'; btn.className=cls; }
+    }
+  });
+  // dictamenes
+  if(data.dict){
+    state.dict = Object.assign(state.dict, data.dict);
+    Object.entries(data.dict).forEach(([k,v])=>{
+      if(!v) return;
+      const parent=document.querySelector(`.dictamen[data-dict="${k}"]`);
+      if(parent){ const btn=[...parent.querySelectorAll('button')].find(b=>b.dataset.v===v); if(btn) btn.className=(v==='APROBADO')?'ok':'no'; }
+    });
+  }
+  // firmas dibujadas -> se pintan cuando el canvas ya esté dimensionado
+  window._firmasGuardadas = data.firmas||{};
+}
+
+// pinta firmas restauradas en canvas ya visibles
+function pintarFirmasGuardadas(){
+  if(!window._firmasGuardadas) return;
+  Object.entries(window._firmasGuardadas).forEach(([k,dataURL])=>{
+    const pad=sigPads[k]; if(!pad||!dataURL) return;
+    pad.ensureSize&&pad.ensureSize();
+    const ctx=pad.canvas.getContext('2d');
+    const img=new Image();
+    img.onload=()=>{
+      const ratio=window.devicePixelRatio||1;
+      ctx.drawImage(img,0,0,pad.canvas.width/ratio,pad.canvas.height/ratio);
+      pad._restored=true;
+    };
+    img.src=dataURL;
+  });
+}
+
+function nuevoReporte(){
+  if(!confirm('¿Iniciar un nuevo reporte? Se borrarán todos los datos actuales.')) return;
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  location.reload();
+}
+
+// engancha autoguardado a toda interacción
+document.addEventListener('input', guardarDebounced);
+document.addEventListener('click', e=>{
+  if(e.target.closest('.seg button')||e.target.closest('.dictamen button')) guardarDebounced();
+});
+
+// guarda firma al terminar cada trazo
+function engancharGuardadoFirmas(){
+  Object.values(sigPads).forEach(pad=>{
+    pad.canvas.addEventListener('mouseup', guardarDebounced);
+    pad.canvas.addEventListener('touchend', guardarDebounced);
+  });
+}
+
 // ---------- INIT ----------
 buildProgress();
 buildCarga();
@@ -508,4 +639,6 @@ buildSubita();
 buildAlarmas();
 buildFirmas();
 document.querySelectorAll('.pstep').forEach(p=>p.addEventListener('click',()=>showStep(+p.dataset.p)));
+restaurar();
+engancharGuardadoFirmas();
 showStep(0);
