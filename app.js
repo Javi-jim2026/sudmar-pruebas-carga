@@ -299,7 +299,8 @@ function generarPDF(){
     // --- Logo Prettl (centro) ---
     try{
       if(typeof LOGO_PRETTL!=='undefined' && LOGO_PRETTL){
-        doc.addImage(LOGO_PRETTL,'PNG', W/2-18, 6, 36, 9);
+        // proporcion 500x145 -> alto 9mm => ancho ~31mm
+        doc.addImage(LOGO_PRETTL,'PNG', W/2-15.5, 6, 31, 9);
       } else {
         doc.setFontSize(13); doc.setTextColor(60,60,60); doc.setFont('helvetica','bold');
         doc.text('PRETTL', W/2-12, 12);
