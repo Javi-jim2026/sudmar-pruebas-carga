@@ -289,25 +289,30 @@ function generarPDF(){
     doc.setFillColor(255,255,255);
     doc.rect(0,0,W,20,'F');
     doc.setDrawColor(...AZUL); doc.setLineWidth(0.6); doc.rect(4,3,W-8,16);
-    // --- Logo Sudmar: 3 circulos dibujados + texto ---
-    doc.setFillColor(...AZUL);
-    doc.circle(11, 10, 1.6, 'F');
-    doc.circle(15.5, 10, 1.6, 'F');
-    doc.circle(20, 10, 1.6, 'F');
-    doc.setTextColor(...AZUL); doc.setFont('helvetica','bold');
-    doc.setFontSize(15); doc.text('Sudmar', 24, 12);
-    doc.setFontSize(7); doc.setTextColor(120,120,120); doc.text('Energy', 42, 15);
+    // --- Logo Sudmar (imagen real, fondo azul) ---
+    try{
+      if(typeof LOGO_SUDMAR!=='undefined' && LOGO_SUDMAR){
+        // proporcion 500x137 -> alto 11mm => ancho ~40mm
+        doc.addImage(LOGO_SUDMAR,'PNG', 7, 5.5, 40, 11);
+      }
+    }catch(e){}
     // --- Logo Prettl (centro) ---
-    doc.setFontSize(13); doc.setTextColor(60,60,60); doc.setFont('helvetica','bold');
-    doc.text('PRETTL', W/2-12, 12);
-    doc.setFontSize(6); doc.text('energy', W/2-1, 15);
-    // --- Logo Endress: triangulo dibujado + texto ---
-    doc.setFillColor(...ROJO);
-    doc.triangle(W-56, 9, W-56, 13, W-52.5, 11, 'F');
-    doc.setFontSize(13); doc.setTextColor(...ROJO); doc.setFont('helvetica','bold');
-    doc.text('ENDRESS', W-50, 12);
-    doc.setFontSize(6); doc.setTextColor(120,120,120); doc.setFont('helvetica','normal');
-    doc.text('Together, always on.', W-50, 16);
+    try{
+      if(typeof LOGO_PRETTL!=='undefined' && LOGO_PRETTL){
+        doc.addImage(LOGO_PRETTL,'PNG', W/2-18, 6, 36, 9);
+      } else {
+        doc.setFontSize(13); doc.setTextColor(60,60,60); doc.setFont('helvetica','bold');
+        doc.text('PRETTL', W/2-12, 12);
+        doc.setFontSize(6); doc.text('energy', W/2-1, 15);
+      }
+    }catch(e){}
+    // --- Logo Endress (imagen real, fondo transparente) ---
+    try{
+      if(typeof LOGO_ENDRESS!=='undefined' && LOGO_ENDRESS){
+        // proporcion 500x73 -> alto 7mm => ancho ~48mm
+        doc.addImage(LOGO_ENDRESS,'PNG', W-56, 6.5, 48, 7);
+      }
+    }catch(e){}
   }
 
   function bandaTitulo(y,txt,color){
