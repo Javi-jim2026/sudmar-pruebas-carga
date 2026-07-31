@@ -456,10 +456,10 @@ function generarPDF(){
   // --- Resultado final (banda ancho completo) ---
   let yF = Math.max(doc.lastAutoTable.finalY, yL) + 4;
   const finalTxt = state.dict.final==='APROBADO'
-    ? 'RESULTADO FINAL:  ☑ EQUIPO APROBADO PARA OPERACIÓN     ☐ EQUIPO REQUIERE CORRECCIONES'
+    ? 'RESULTADO FINAL:     [ X ] EQUIPO APROBADO PARA OPERACION        [   ] EQUIPO REQUIERE CORRECCIONES'
     : state.dict.final==='CORRECCIONES'
-    ? 'RESULTADO FINAL:  ☐ EQUIPO APROBADO PARA OPERACIÓN     ☑ EQUIPO REQUIERE CORRECCIONES'
-    : 'RESULTADO FINAL:  ☐ EQUIPO APROBADO PARA OPERACIÓN     ☐ EQUIPO REQUIERE CORRECCIONES';
+    ? 'RESULTADO FINAL:     [   ] EQUIPO APROBADO PARA OPERACION        [ X ] EQUIPO REQUIERE CORRECCIONES'
+    : 'RESULTADO FINAL:     [   ] EQUIPO APROBADO PARA OPERACION        [   ] EQUIPO REQUIERE CORRECCIONES';
   doc.setFillColor(...ROJO); doc.rect(4,yF,W-8,6,'F');
   doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(8);
   doc.text(finalTxt, W/2, yF+4, {align:'center'});
