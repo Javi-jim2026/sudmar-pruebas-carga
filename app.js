@@ -264,12 +264,18 @@ const HELP = {
       <div class="help-item"><b>Objetivo del reporte.</b> Documentar condiciones de prueba, valores eléctricos y mecánicos, protecciones, carga súbita y firmas de conformidad.</div>
       <div class="help-item"><b>Regla principal.</b> Los límites del fabricante, la ficha técnica, el plan de pruebas y el criterio contractual prevalecen sobre valores genéricos del formato.</div>
       <div class="help-item"><b>Datos reales.</b> Registra los tiempos y valores realmente observados; el formato no impone una duración universal para cada escalón.</div>
+      <div class="help-item"><b>Siglas frecuentes.</b> PRP/LTP/ESP/COP describen ratings de potencia; FP o cosφ es factor de potencia; L-L significa tensión línea a línea; AMF es arranque por falla de red y ATS es transferencia automática.</div>
     `
   },
   datos:{
     title:'Ayuda · Datos generales',
     body:`
-      <div class="help-item"><b>Potencia nominal.</b> Captura la potencia indicada en placa o ficha técnica, expresada en kVA/kW. La clasificación puede ser PRP, LTP, ESP u otra según fabricante.</div>
+      <div class="help-item"><b>Potencia nominal.</b> Captura la potencia indicada en placa o ficha técnica, expresada en kVA/kW, y revisa qué clasificación declara el fabricante.</div>
+      <div class="help-item"><b>PRP · Prime Power.</b> Potencia para carga variable durante un número ilimitado de horas, bajo las condiciones y límites de carga promedio definidos por norma/fabricante.</div>
+      <div class="help-item"><b>LTP · Limited-Time Power.</b> Potencia de funcionamiento limitado; normalmente se especifica para hasta 500 h/año bajo las condiciones declaradas.</div>
+      <div class="help-item"><b>ESP · Emergency Standby Power.</b> Potencia de emergencia para falla de red o pruebas; normalmente se especifica para hasta 200 h/año bajo las condiciones declaradas.</div>
+      <div class="help-item"><b>COP · Continuous Power.</b> Potencia continua para carga esencialmente constante durante horas ilimitadas.</div>
+      <div class="help-item"><b>kVA / kW / FP.</b> kVA es potencia aparente; kW es potencia activa; FP o cosφ relaciona ambas. Un banco resistivo trabaja aproximadamente con FP=1.</div>
       <div class="help-item"><b>Corriente nominal.</b> Captura la corriente indicada en placa o ficha técnica. No la confundas con la corriente observada durante un escalón de kW en un banco resistivo.</div>
       <div class="help-item"><b>Controlador / Panel.</b> Módulo electrónico que gestiona arranque, paro, alarmas, protecciones y mediciones.</div>
       <div class="help-item"><b>Interruptor principal.</b> Protección de salida del generador (MCCB/ACB u otro interruptor principal).</div>
@@ -302,6 +308,11 @@ const HELP = {
       <div class="help-item"><b>Mínimo voltaje transitorio.</b> Menor tensión registrada inmediatamente después de aplicar el escalón.</div>
       <div class="help-item"><b>Recuperación.</b> Tiempo requerido para volver a la banda de estabilidad definida por la clase de desempeño o por el fabricante.</div>
       <div class="help-item"><b>ISO 8528-5.</b> La norma utiliza clases de desempeño; no existe un único límite válido para todos los grupos. Selecciona la clase declarada o usa la referencia contractual/fabricante.</div>
+      <div class="help-item"><b>G1.</b> Clase básica de desempeño, para aplicaciones donde las variaciones transitorias de voltaje y frecuencia son menos críticas.</div>
+      <div class="help-item"><b>G2.</b> Desempeño más exigente que G1, habitual en aplicaciones comerciales e industriales con cargas normales.</div>
+      <div class="help-item"><b>G3.</b> Requisitos más estrictos de estabilidad y respuesta transitoria para cargas más sensibles.</div>
+      <div class="help-item"><b>G4.</b> Sus límites se establecen por acuerdo entre fabricante y cliente/aplicación; no debe interpretarse como una tabla universal con valores fijos.</div>
+      <div class="help-item"><b>Cómo elegir la clase.</b> No la selecciones únicamente por el tipo de instalación. Confirma la clase en ficha técnica, documentación del fabricante, contrato o plan de pruebas y registra el escalón real aplicado.</div>
       <div class="help-item"><b>T (s).</b> Registra el tiempo real del evento o del punto de captura. Ya no se fuerza un tiempo fijo para el mínimo transitorio o la recuperación.</div>
     `
   },
@@ -311,7 +322,8 @@ const HELP = {
       <div class="help-item"><b>Configurado.</b> La protección o función existe y está habilitada/configurada en el equipo.</div>
       <div class="help-item"><b>Probado.</b> La función fue realmente verificada durante esta intervención.</div>
       <div class="help-item"><b>Resultado.</b> OK si la prueba fue satisfactoria; FALLA si no actuó correctamente; N/A cuando la función no aplica al alcance o configuración del equipo.</div>
-      <div class="help-item"><b>AMF / Transferencia.</b> Solo aplica cuando el sistema incluye arranque por falla de red y/o tablero de transferencia.</div>
+      <div class="help-item"><b>AMF.</b> Automatic Mains Failure: lógica de arranque automático ante pérdida o falla de red.</div>
+      <div class="help-item"><b>ATS / Transferencia.</b> Automatic Transfer Switch: tablero o sistema que transfiere la carga entre red y generador cuando aplica.</div>
     `
   },
   firmas:{
