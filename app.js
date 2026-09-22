@@ -125,12 +125,12 @@ function buildSubita(){
   tb.innerHTML = SUBITA_ROWS.map(r=>`
     <tr>
       <td class="cond">${r.c}</td>
-      <td><input data-sub="${r.k}-t" value="${r.t}" inputmode="decimal"></td>
-      <td><input data-sub="${r.k}-v" inputmode="decimal"></td>
-      <td><input data-sub="${r.k}-hz" inputmode="decimal"></td>
-      <td><input data-sub="${r.k}-a" inputmode="decimal"></td>
-      <td><input data-sub="${r.k}-rpm" inputmode="decimal"></td>
-      <td><input data-sub="${r.k}-obs"></td>
+      <td><input data-sub="${r.k}-t" value="${r.t}" type="number" step="any" min="0" inputmode="decimal" ${r.k==='pre'?'readonly':''} placeholder="s"></td>
+      <td><input data-sub="${r.k}-v" type="number" step="any" min="0" inputmode="decimal" placeholder="V"></td>
+      <td><input data-sub="${r.k}-hz" type="number" step="any" min="0" inputmode="decimal" placeholder="Hz"></td>
+      <td><input data-sub="${r.k}-a" type="number" step="any" min="0" inputmode="decimal" placeholder="A"></td>
+      <td><input data-sub="${r.k}-rpm" type="number" step="any" min="0" inputmode="decimal" placeholder="RPM"></td>
+      <td><input data-sub="${r.k}-obs" placeholder="Comentario / condición"></td>
     </tr>`).join('');
 }
 
@@ -313,7 +313,9 @@ const HELP = {
       <div class="help-item"><b>G3.</b> Requisitos más estrictos de estabilidad y respuesta transitoria para cargas más sensibles.</div>
       <div class="help-item"><b>G4.</b> Sus límites se establecen por acuerdo entre fabricante y cliente/aplicación; no debe interpretarse como una tabla universal con valores fijos.</div>
       <div class="help-item"><b>Cómo elegir la clase.</b> No la selecciones únicamente por el tipo de instalación. Confirma la clase en ficha técnica, documentación del fabricante, contrato o plan de pruebas y registra el escalón real aplicado.</div>
-      <div class="help-item"><b>T (s).</b> Registra el tiempo real del evento o del punto de captura. Ya no se fuerza un tiempo fijo para el mínimo transitorio o la recuperación.</div>
+      <div class="help-item"><b>Tiempo desde evento (s).</b> Captura segundos, no “OK”. Para la aplicación de carga, cuenta desde el instante en que entra el escalón; para el retiro, vuelve a contar desde el instante en que se retira la carga. “Antes de aplicar carga” queda en 0 s.</div>
+      <div class="help-item"><b>Voltaje / Frecuencia / Corriente / RPM.</b> Son lecturas numéricas reales tomadas en cada instante. Si no fue posible medir un valor, déjalo vacío y explícalo en Observaciones.</div>
+      <div class="help-item"><b>Observaciones.</b> Es el único campo de texto libre por fila. Úsalo para indicar comportamiento, alarma, oscilación, recuperación irregular o cualquier condición relevante.</div>
     `
   },
   alarmas:{
@@ -554,7 +556,7 @@ function generarPDF(){
   const alarmEnd=doc.lastAutoTable.finalY;
 
   bandaTitulo(22,'PRUEBA DE CARGA SÚBITA (STEP LOAD TEST)',AZUL2,colR,colRW,9);
-  const subHead=[['INSTANTE / CONDICIÓN','T (s)','VOLTAJE\n(V)','FREC.\n(Hz)','CORR.\n(A)','RPM','OBS.']];
+  const subHead=[['INSTANTE / CONDICIÓN','TIEMPO\nDESDE EVENTO (s)','VOLTAJE\n(V)','FREC.\n(Hz)','CORR.\n(A)','RPM','OBS.']];
   const subBody=SUBITA_ROWS.map(r=>[r.c,subV(`${r.k}-t`),subV(`${r.k}-v`),subV(`${r.k}-hz`),subV(`${r.k}-a`),subV(`${r.k}-rpm`),subV(`${r.k}-obs`)]);
   doc.autoTable({
     startY:30, margin:{left:colR}, tableWidth:colRW, head:subHead, body:subBody, theme:'grid',
@@ -568,8 +570,7 @@ function generarPDF(){
   const critBody=[
     ['Clase / criterio:',g('isoClase')||'No especificado'],
     ['Escalón de carga:',`${g('cargaInicial')||'—'}% → ${g('cargaFinal')||'—'}%`],
-    ['Referencia fabricante / contractual:',g('criterioRef')||'—'],
-    ['Criterio de evaluación:','Aplicar límites de la clase/documento seleccionado'],
+    ['Criterio de evaluación:','Aplicar límites de la clase o criterio seleccionado'],
     ['RESULTADO CARGA SÚBITA:',state.dict.subita||'—']
   ];
   doc.autoTable({
@@ -577,7 +578,7 @@ function generarPDF(){
     styles:{fontSize:6.6,cellPadding:1.2,lineColor:[217,222,230],lineWidth:0.1},
     columnStyles:{0:{fontStyle:'bold',fillColor:GRIS,cellWidth:60},1:{halign:'center'}},
     didParseCell:d=>{
-      if(d.row.index===4&&d.column.index===1){
+      if(d.row.index===3&&d.column.index===1){
         d.cell.styles.fontStyle='bold';
         if(d.cell.raw==='APROBADO'){d.cell.styles.fillColor=VERDE;d.cell.styles.textColor=[255,255,255];}
         else if(d.cell.raw==='RECHAZADO'){d.cell.styles.fillColor=ROJO;d.cell.styles.textColor=[255,255,255];}
