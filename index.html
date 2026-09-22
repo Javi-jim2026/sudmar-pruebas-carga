@@ -59,6 +59,7 @@
   .seg button.on-no{background:#7b8794;color:#fff}
   .seg button.on-ok{background:var(--verde);color:#fff}
   .seg button.on-falla{background:var(--rojo);color:#fff}
+  .seg button.on-na{background:#607d8b;color:#fff}
   .seg-lbl{font-size:9px;color:#9aa5b1;text-align:center;margin-bottom:2px;text-transform:uppercase}
   .step-lbl{font-size:11px;font-weight:700;color:var(--azul);margin:14px 0 6px;background:var(--amar);padding:6px 10px;border-radius:6px}
   .firma-box{margin-bottom:16px}
@@ -77,6 +78,30 @@
   .dictamen button.no{background:var(--rojo);color:#fff;border-color:var(--rojo)}
   .hint{font-size:11px;color:#9aa5b1;margin-top:4px}
   .crit{font-size:10px;color:#7b8794;background:var(--gris);padding:8px;border-radius:6px;margin-top:10px;line-height:1.5}
+  .help-btn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .help-inline{display:inline-flex;align-items:center;gap:5px;margin:0 0 10px;padding:7px 10px;border:1px solid #c8d3e1;background:#f7f9fc;color:var(--azul);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}
+  .help-modal{position:fixed;inset:0;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;padding:18px;z-index:200}
+  .help-modal.open{display:flex}
+  .help-card{width:min(760px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 18px 60px rgba(0,0,0,.28)}
+  .help-head{position:sticky;top:0;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--bord);z-index:2}
+  .help-head h3{margin:0;color:var(--azul);font-size:16px}
+  .help-close{border:none;background:var(--gris);color:#52606d;border-radius:8px;padding:7px 10px;font-size:18px;line-height:1;cursor:pointer}
+  .help-body{padding:14px 16px 18px;font-size:13px;line-height:1.55}
+  .help-item{padding:10px 0;border-bottom:1px solid #edf0f4}
+  .help-item:last-child{border-bottom:none}
+  .help-item b{color:var(--azul)}
+  .checks{margin-top:8px;border:1px solid var(--bord);border-radius:8px;overflow:hidden}
+  .check-head,.check-row{display:grid;grid-template-columns:1.35fr .8fr 1.4fr;gap:8px;align-items:center;padding:8px 10px}
+  .check-head{background:var(--azul);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase}
+  .check-row{border-top:1px solid var(--bord);font-size:11px}
+  .check-row:first-of-type{border-top:none}
+  .check-row input,.check-row select{padding:8px;font-size:12px}
+  .firma-option{padding:12px;background:#f7f9fc;border:1px solid var(--bord);border-radius:8px;margin-bottom:14px}
+  .firma-option label{margin-top:0}
+  .firmas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .firmas-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .firma-box{border:1px solid #e2e7ee;border-radius:10px;padding:12px;margin-bottom:0;background:#fff}
+  @media(max-width:800px){.firmas-grid,.firmas-grid.three{grid-template-columns:1fr}.check-head,.check-row{grid-template-columns:1fr}.check-head{display:none}}
 </style>
 </head>
 <body>
@@ -86,7 +111,10 @@
       <h1>Reporte de Pruebas con Carga</h1>
       <div class="sub">Grupo Electrógeno · Sudmar Energy</div>
     </div>
-    <button onclick="nuevoReporte()" style="flex:0 0 auto;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600">Nuevo</button>
+    <div style="display:flex;gap:8px;flex:0 0 auto">
+      <button onclick="openHelp('general')" class="help-btn">Ayuda</button>
+      <button onclick="nuevoReporte()" class="help-btn">Nuevo</button>
+    </div>
   </div>
 </header>
 
@@ -104,7 +132,7 @@
         <div><label>Técnico Responsable</label><input id="tecnico"></div>
         <div><label>No. de Serie Generador</label><input id="serie"></div>
         <div><label>Modelo / Tipo</label><input id="modelo"></div>
-        <div><label>Potencia Nominal LTP (kVA/kW)</label><input id="potencia"></div>
+        <div><label>Potencia Nominal (kVA/kW)</label><input id="potencia"></div>
         <div><label>Voltaje Nominal (V)</label><input id="voltaje"></div>
         <div><label>Frecuencia Nominal (Hz)</label><input id="frecuencia" value="60"></div>
         <div><label>Corriente Nominal Cosφ0.8 (A)</label><input id="corriente"></div>
@@ -149,6 +177,9 @@
         <span>Parámetro</span><span>Mín</span><span>Máx</span><span>Lect. 1</span><span>Lect. 2</span><span>Lect. 3</span>
       </div>
       <div id="param-body"></div>
+      <div class="step-lbl" style="margin-top:18px">Verificaciones previas</div>
+      <div class="hint">Registra niveles y condiciones previas sin mezclarlos con las lecturas dinámicas del motor.</div>
+      <div id="check-body" class="checks"></div>
     </div>
   </div>
 
@@ -156,6 +187,24 @@
   <div class="step" data-step="3">
     <div class="card">
       <h2 class="sec">Prueba de Carga Súbita · Step Load Test</h2>
+      <div class="grid2">
+        <div>
+          <label>Clase de desempeño / criterio aplicable</label>
+          <select id="isoClase">
+            <option value="">Seleccionar criterio</option>
+            <option value="ISO 8528-5 G1">ISO 8528-5 · G1</option>
+            <option value="ISO 8528-5 G2">ISO 8528-5 · G2</option>
+            <option value="ISO 8528-5 G3">ISO 8528-5 · G3</option>
+            <option value="ISO 8528-5 G4 / AMC">ISO 8528-5 · G4 / AMC</option>
+            <option value="Según fabricante / contrato">Según fabricante / contrato</option>
+          </select>
+        </div>
+        <div>
+          <label>Referencia del fabricante / documento</label>
+          <input id="criterioRef" placeholder="Ej. ficha técnica, plan de pruebas, contrato...">
+        </div>
+      </div>
+      <p class="hint">Los límites transitorios no son universales: dependen de la clase de desempeño declarada, del tamaño del escalón de carga y de la documentación del fabricante.</p>
       <div class="tabla-wrap">
         <table class="carga">
           <thead>
@@ -168,11 +217,7 @@
           <tbody id="subita-body"></tbody>
         </table>
       </div>
-      <div class="crit">
-        <b>Criterios de aceptación · ISO 8528-5</b><br>
-        Caída máx. voltaje transitorio: ≤ -15% del nominal · Recuperación voltaje: &lt; 3 s al ±3% ·
-        Caída máx. frecuencia: ≤ -10% del nominal · Recuperación frecuencia: &lt; 5 s al ±1 Hz
-      </div>
+      <div class="crit"><b>Criterio técnico:</b> evaluar la prueba contra la clase de desempeño o documento de fabricante/contrato seleccionado arriba. No aplicar un único límite genérico a todos los equipos.</div>
       <label>Resultado Carga Súbita</label>
       <div class="dictamen" data-dict="subita">
         <button data-v="APROBADO">APROBADO</button>
@@ -200,7 +245,15 @@
     </div>
     <div class="card">
       <h2 class="sec">Firmas de Conformidad</h2>
-      <div id="firmas"></div>
+      <div class="firma-option">
+        <label>¿Participa un representante de marca Endress?</label>
+        <select id="firmaEndress">
+          <option value="no">No · firmarán técnico Sudmar y cliente</option>
+          <option value="si">Sí · agregar firma del representante Endress</option>
+        </select>
+        <div class="hint">La tercera firma solo se incluye cuando el representante de marca está presente en la prueba.</div>
+      </div>
+      <div id="firmas" class="firmas-grid"></div>
     </div>
   </div>
 </main>
