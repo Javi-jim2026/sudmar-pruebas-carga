@@ -45,12 +45,11 @@
   table.carga input{border:none;border-radius:0;padding:8px 4px;font-size:13px;text-align:center;min-width:56px}
   table.carga input:focus{box-shadow:inset 0 0 0 2px var(--azul)}
   .fijo{background:#eef1f5;text-align:center;font-size:12px;font-weight:600;color:#52606d;padding:8px 2px}
-  .param-row{display:grid;grid-template-columns:1.6fr .7fr .7fr 1fr 1fr 1fr;gap:5px;align-items:center;padding:6px 0;border-bottom:1px solid var(--gris)}
+  .param-row{display:grid;grid-template-columns:minmax(150px,1.8fr) 1fr 1fr .9fr;gap:7px;align-items:center;padding:7px 0;border-bottom:1px solid var(--gris)}
   .param-row .pname{font-size:11px;font-weight:600}
-  .param-row .lim{font-size:10px;text-align:center;color:#7b8794;background:var(--gris);padding:4px 2px;border-radius:4px}
-  .param-row input{padding:8px 4px;font-size:13px;text-align:center}
-  .param-row input.plim{background:#eef1f5;color:#52606d;font-size:11px}
-  .param-head{display:grid;grid-template-columns:1.6fr .7fr .7fr 1fr 1fr 1fr;gap:5px;font-size:9px;font-weight:700;color:var(--azul);text-transform:uppercase;padding-bottom:6px;text-align:center}
+  .param-row input{padding:9px 6px;font-size:13px;text-align:center}
+  .param-delta{padding:9px 6px;border-radius:6px;background:#eef1f5;color:#52606d;font-size:12px;font-weight:700;text-align:center;min-height:36px;display:flex;align-items:center;justify-content:center}
+  .param-head{display:grid;grid-template-columns:minmax(150px,1.8fr) 1fr 1fr .9fr;gap:7px;font-size:9px;font-weight:700;color:var(--azul);text-transform:uppercase;padding-bottom:6px;text-align:center}
   .param-head span:first-child{text-align:left}
   .alarma{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(220px,1fr);gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--gris)}
   .alarma .aname{font-size:11px;font-weight:600}
@@ -111,7 +110,7 @@
   .guide-content p{margin:7px 0}
   .guide-content b{color:var(--azul)}
   .guide-note{margin-top:8px;padding:8px 10px;background:#fff9e6;border-radius:7px;color:#6d5b1b}
-  @media(max-width:800px){.firmas-grid,.firmas-grid.three{grid-template-columns:1fr}.check-head,.check-row{grid-template-columns:1fr}.check-head{display:none}.alarma{grid-template-columns:1fr;gap:6px}}
+  @media(max-width:800px){.firmas-grid,.firmas-grid.three{grid-template-columns:1fr}.check-head,.check-row{grid-template-columns:1fr}.check-head{display:none}.alarma{grid-template-columns:1fr;gap:6px}.param-head{display:none}.param-row{grid-template-columns:1fr 1fr}.param-row .pname{grid-column:1/-1;font-size:12px}.param-row input,.param-delta{width:100%}}
 </style>
 </head>
 <body>
@@ -190,16 +189,32 @@
     </div>
   </div>
 
-  <!-- PASO 3: PARAMETROS DE MOTOR -->
+  <!-- PASO 3: MOTOR CON CARGA CONTINUA -->
   <div class="step" data-step="2">
     <div class="card">
-      <h2 class="sec">Parámetros de Motor</h2>
+      <h2 class="sec">Parámetros de Motor con Carga Continua</h2>
+      <p class="hint">Objetivo: comparar la condición del motor al iniciar una carga sostenida contra su comportamiento después de 30 min o más. Registra valores reales para identificar cambios, estabilidad o tendencias.</p>
+
+      <div class="grid2" style="margin:10px 0 14px">
+        <div>
+          <label>Carga continua aplicada (%)</label>
+          <input id="cargaContinuaPct" type="number" step="any" min="0" max="100" inputmode="decimal" placeholder="Ej. 75">
+        </div>
+        <div>
+          <label>Tiempo bajo carga continua (min)</label>
+          <input id="cargaContinuaMin" type="number" step="any" min="0" inputmode="decimal" placeholder="30 o más">
+        </div>
+      </div>
+
       <div class="param-head">
-        <span>Parámetro</span><span>Mín. ref.</span><span>Máx. ref.</span><span>Lect. 1</span><span>Lect. 2</span><span>Lect. 3</span>
+        <span>Parámetro</span><span>Inicio carga continua</span><span>Después de ≥30 min</span><span>Δ Cambio</span>
       </div>
       <div id="param-body"></div>
-      <div class="step-lbl" style="margin-top:18px">Verificaciones previas</div>
-      <div class="hint">Registra niveles y condiciones previas sin mezclarlos con las lecturas dinámicas del motor.</div>
+
+      <div class="crit"><b>Cómo interpretarlo:</b> la columna Δ muestra el cambio entre la lectura final y la inicial. No determina por sí sola si el valor es correcto; sirve para comparar la tendencia junto con la carga aplicada, el tiempo de prueba y los límites del fabricante.</div>
+
+      <div class="step-lbl" style="margin-top:18px">Verificación al finalizar la carga continua</div>
+      <div class="hint">Confirma niveles o condiciones visibles después del periodo sostenido y documenta cualquier anomalía.</div>
       <div id="check-body" class="checks"></div>
     </div>
   </div>
