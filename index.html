@@ -49,6 +49,7 @@
   .param-row .pname{font-size:11px;font-weight:600}
   .param-row .lim{font-size:10px;text-align:center;color:#7b8794;background:var(--gris);padding:4px 2px;border-radius:4px}
   .param-row input{padding:8px 4px;font-size:13px;text-align:center}
+  .param-row input.plim{background:#eef1f5;color:#52606d;font-size:11px}
   .param-head{display:grid;grid-template-columns:1.6fr .7fr .7fr 1fr 1fr 1fr;gap:5px;font-size:9px;font-weight:700;color:var(--azul);text-transform:uppercase;padding-bottom:6px;text-align:center}
   .param-head span:first-child{text-align:left}
   .alarma{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--gris)}
@@ -135,7 +136,7 @@
         <div><label>Potencia Nominal (kVA/kW)</label><input id="potencia"></div>
         <div><label>Voltaje Nominal (V)</label><input id="voltaje"></div>
         <div><label>Frecuencia Nominal (Hz)</label><input id="frecuencia" value="60"></div>
-        <div><label>Corriente Nominal Cosφ0.8 (A)</label><input id="corriente"></div>
+        <div><label>Corriente Nominal (A)</label><input id="corriente"></div>
         <div><label>Motor (Marca / Modelo)</label><input id="motor"></div>
         <div><label>Alternador</label><input id="alternador"></div>
         <div><label>Controlador / Panel</label><input id="controlador"></div>
@@ -151,13 +152,13 @@
   <div class="step" data-step="1">
     <div class="card">
       <h2 class="sec">Pruebas con Carga · Banco Resistivo</h2>
-      <p class="hint">Cosφ=1 · Tolerancias: Voltaje ±5% · Frecuencia ±2% · Temp. agua ≤95°C · Presión aceite ≥2.0 bar</p>
+      <p class="hint">Banco resistivo FP≈1 · Registra el tiempo y los valores reales de cada escalón. Los límites de aceptación deben tomarse de la ficha técnica, fabricante o plan de pruebas aprobado.</p>
       <div class="tabla-wrap">
         <table class="carga">
           <thead>
             <tr>
               <th class="cond">Condición</th>
-              <th>Tiempo (s)</th><th>Voltaje L-L (V)</th>
+              <th>Tiempo real (s)</th><th>Voltaje L-L (V)</th>
               <th>Corr. L1 (A)</th><th>Corr. L2 (A)</th><th>Corr. L3 (A)</th>
               <th>Potencia (kW)</th><th>Frec. (Hz)</th><th>RPM</th>
               <th>Presión (bar)</th><th>Temp. agua (°C)</th><th>Observaciones</th>
@@ -174,7 +175,7 @@
     <div class="card">
       <h2 class="sec">Parámetros de Motor</h2>
       <div class="param-head">
-        <span>Parámetro</span><span>Mín</span><span>Máx</span><span>Lect. 1</span><span>Lect. 2</span><span>Lect. 3</span>
+        <span>Parámetro</span><span>Mín. ref.</span><span>Máx. ref.</span><span>Lect. 1</span><span>Lect. 2</span><span>Lect. 3</span>
       </div>
       <div id="param-body"></div>
       <div class="step-lbl" style="margin-top:18px">Verificaciones previas</div>
@@ -195,7 +196,7 @@
             <option value="ISO 8528-5 G1">ISO 8528-5 · G1</option>
             <option value="ISO 8528-5 G2">ISO 8528-5 · G2</option>
             <option value="ISO 8528-5 G3">ISO 8528-5 · G3</option>
-            <option value="ISO 8528-5 G4 / AMC">ISO 8528-5 · G4 / AMC</option>
+            <option value="ISO 8528-5 G4">ISO 8528-5 · G4</option>
             <option value="Según fabricante / contrato">Según fabricante / contrato</option>
           </select>
         </div>
@@ -204,7 +205,17 @@
           <input id="criterioRef" placeholder="Ej. ficha técnica, plan de pruebas, contrato...">
         </div>
       </div>
-      <p class="hint">Los límites transitorios no son universales: dependen de la clase de desempeño declarada, del tamaño del escalón de carga y de la documentación del fabricante.</p>
+      <div class="grid2">
+        <div>
+          <label>Carga inicial del escalón (%)</label>
+          <input id="cargaInicial" inputmode="decimal" placeholder="Ej. 0">
+        </div>
+        <div>
+          <label>Carga final del escalón (%)</label>
+          <input id="cargaFinal" inputmode="decimal" placeholder="Ej. 50">
+        </div>
+      </div>
+      <p class="hint">Los límites transitorios no son universales: dependen de la clase de desempeño declarada, del tamaño real del escalón de carga y de la documentación del fabricante.</p>
       <div class="tabla-wrap">
         <table class="carga">
           <thead>
@@ -248,6 +259,7 @@
       <div class="firma-option">
         <label>¿Participa un representante de marca Endress?</label>
         <select id="firmaEndress">
+          <option value="">Seleccionar</option>
           <option value="no">No · firmarán técnico Sudmar y cliente</option>
           <option value="si">Sí · agregar firma del representante Endress</option>
         </select>
