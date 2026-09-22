@@ -21,11 +21,9 @@ const CARGA_ROWS = [
 
 const PARAMS = [
   {k:"rpm", n:"Velocidad rotación (RPM)"},
-  {k:"hz", n:"Frecuencia generada (Hz)"},
-  {k:"batt", n:"Voltaje baterías (V DC)"},
   {k:"oilpress", n:"Presión aceite motor (bar)"},
   {k:"coolanttemp", n:"Temp. agua/refrigerante (°C)"},
-  {k:"oiltemp", n:"Temp. aceite motor (°C)"},
+  {k:"batt", n:"Voltaje baterías (V DC)"},
   {k:"chargev", n:"Voltaje carga alternador (V DC)"},
 ];
 
@@ -33,6 +31,10 @@ const CHECKS = [
   {k:"fuel", n:"Nivel de combustible (%)", type:"number", placeholder:"0–100"},
   {k:"coolant", n:"Nivel de refrigerante", type:"status"},
   {k:"oil", n:"Nivel de aceite motor", type:"status"},
+  {k:"leaks", n:"Ausencia de fugas · aceite / refrigerante / combustible", type:"result"},
+  {k:"smoke", n:"Humo de escape sin condición anormal", type:"result"},
+  {k:"noisevib", n:"Ruido y vibración sin condición anormal", type:"result"},
+  {k:"fanrad", n:"Ventilador / radiador operando correctamente", type:"result"},
 ];
 
 const ALARMAS = [
@@ -77,9 +79,6 @@ function buildCarga(){
       <td><input data-carga="${r.k}-l3" inputmode="decimal"></td>
       <td><input data-carga="${r.k}-kw" inputmode="decimal"></td>
       <td><input data-carga="${r.k}-hz" inputmode="decimal"></td>
-      <td><input data-carga="${r.k}-rpm" inputmode="decimal"></td>
-      <td><input data-carga="${r.k}-bar" inputmode="decimal"></td>
-      <td><input data-carga="${r.k}-temp" inputmode="decimal"></td>
       <td><input data-carga="${r.k}-obs"></td>
     </tr>`).join('');
 }
@@ -116,6 +115,8 @@ function buildChecks(){
     CHECKS.map(c=>{
       const control = c.type==='status'
         ? `<select data-check="${c.k}-v"><option value="">Seleccionar</option><option value="OK">OK</option><option value="BAJO">Bajo</option><option value="NO VERIFICADO">No verificado</option><option value="N/A">N/A</option></select>`
+        : c.type==='result'
+        ? `<select data-check="${c.k}-v"><option value="">Seleccionar</option><option value="OK">OK</option><option value="FALLA">Falla</option><option value="N/A">N/A</option></select>`
         : `<input data-check="${c.k}-v" inputmode="decimal" placeholder="${c.placeholder||''}">`;
       return `<div class="check-row"><strong>${c.n}</strong>${control}<input data-check="${c.k}-obs" placeholder="Observaciones"></div>`;
     }).join('');
@@ -264,8 +265,8 @@ const HELP = {
       <div class="help-item"><b>Voltaje L-L.</b> Tensión medida entre fases. Si existe desbalance relevante, anótalo en observaciones.</div>
       <div class="help-item"><b>Corriente L1/L2/L3.</b> Corriente por fase. Ayuda a detectar desbalance de carga.</div>
       <div class="help-item"><b>Potencia kW.</b> Potencia activa entregada durante el escalón de prueba.</div>
-      <div class="help-item"><b>Frecuencia / RPM.</b> Permiten observar la respuesta del gobernador y la estabilidad del conjunto motor-generador.</div>
-      <div class="help-item"><b>Presión de aceite / temperatura.</b> Deben compararse contra los límites específicos del motor, no únicamente contra referencias genéricas.</div>
+      <div class="help-item"><b>Frecuencia.</b> Permite observar la estabilidad de la frecuencia mientras cambia la carga.</div>
+      <div class="help-item"><b>Enfoque de esta tabla.</b> Aquí se registra el comportamiento eléctrico. RPM, presión de aceite y temperatura se comparan por separado durante la carga continua para evitar captura repetida.</div>
     `
   },
   motor:{
@@ -278,7 +279,8 @@ const HELP = {
       <div class="help-item"><b>Inicio / después de ≥30 min.</b> Registra las lecturas reales del mismo parámetro en ambos momentos para poder observar tendencia.</div>
       <div class="help-item"><b>Δ Cambio.</b> Se calcula automáticamente como lectura final menos lectura inicial. Es una comparación, no un criterio automático de aprobación.</div>
       <div class="help-item"><b>Evaluación.</b> Interpreta los cambios con la carga aplicada, las condiciones ambientales y los límites específicos del fabricante del motor.</div>
-      <div class="help-item"><b>Verificación final.</b> Después del periodo sostenido revisa combustible, refrigerante y aceite y documenta cualquier anomalía visible.</div>
+      <div class="help-item"><b>Verificación final.</b> Después del periodo sostenido revisa combustible, refrigerante y aceite, y confirma ausencia de fugas, humo anormal, ruido/vibración anormal y funcionamiento correcto de ventilador/radiador.</div>
+      <div class="help-item"><b>OK / FALLA / N/A.</b> En las verificaciones físicas, OK significa que la condición observada es normal; FALLA indica una anomalía y N/A que no aplica o no pudo verificarse.</div>
     `
   },
   alarmas:{
@@ -461,16 +463,16 @@ function generarPDF(){
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.3);
   doc.text('PRUEBAS CON CARGA – BANCO RESISTIVO (FP≈1)  |  Registrar valores y tiempos reales · Límites según fabricante / criterio aprobado', W/2, y+4, {align:'center'});
 
-  const cargaHead = [['CONDICIÓN DE PRUEBA','TIEMPO\nREAL (s)','VOLTAJE\nL-L (V)','CORR.\nL1 (A)','CORR.\nL2 (A)','CORR.\nL3 (A)','POTENCIA\n(kW)','FREC.\n(Hz)','RPM','PRESIÓN\nACEITE (bar)','TEMP.\nAGUA (°C)','OBSERVACIONES']];
+  const cargaHead = [['CONDICIÓN DE PRUEBA','TIEMPO\nREAL (s)','VOLTAJE\nL-L (V)','CORR.\nL1 (A)','CORR.\nL2 (A)','CORR.\nL3 (A)','POTENCIA\n(kW)','FREC.\n(Hz)','OBSERVACIONES']];
   const cargaBody = CARGA_ROWS.map(r=>[
     r.c, cargaV(`${r.k}-t`), cargaV(`${r.k}-v`), cargaV(`${r.k}-l1`), cargaV(`${r.k}-l2`), cargaV(`${r.k}-l3`),
-    cargaV(`${r.k}-kw`), cargaV(`${r.k}-hz`), cargaV(`${r.k}-rpm`), cargaV(`${r.k}-bar`), cargaV(`${r.k}-temp`), cargaV(`${r.k}-obs`)
+    cargaV(`${r.k}-kw`), cargaV(`${r.k}-hz`), cargaV(`${r.k}-obs`)
   ]);
   doc.autoTable({
     startY:y+7, margin:{left:4,right:4}, head:cargaHead, body:cargaBody, theme:'grid',
     headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6,fontStyle:'bold',halign:'center',valign:'middle'},
     styles:{fontSize:7,cellPadding:1.45,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
-    columnStyles:{0:{halign:'left',fontStyle:'bold',fillColor:GRIS,cellWidth:42},11:{cellWidth:'auto'}}
+    columnStyles:{0:{halign:'left',fontStyle:'bold',fillColor:GRIS,cellWidth:42},8:{cellWidth:'auto'}}
   });
 
   // ===================== PÁGINA 2 =====================
@@ -510,7 +512,7 @@ function generarPDF(){
   });
   let leftY=doc.lastAutoTable.finalY+3;
 
-  bandaTitulo(leftY,'VERIFICACIÓN AL FINALIZAR CARGA CONTINUA',AZUL2,colL,colLW,8);
+  bandaTitulo(leftY,'VERIFICACIÓN FÍSICA AL FINALIZAR CARGA CONTINUA',AZUL2,colL,colLW,8);
   const checkBody=CHECKS.map(c=>[c.n,checkV(`${c.k}-v`),checkV(`${c.k}-obs`)]);
   doc.autoTable({
     startY:leftY+8, margin:{left:colL,right:4}, tableWidth:colLW,
@@ -615,7 +617,6 @@ function recolectarEstado(){
     const key = el.id || el.dataset.carga && ('carga:'+el.dataset.carga)
       || el.dataset.param && ('param:'+el.dataset.param)
       || el.dataset.check && ('check:'+el.dataset.check)
-      || el.dataset.sub && ('sub:'+el.dataset.sub)
       || el.dataset.firma && ('firma:'+el.dataset.firma);
     if(key) data.campos[key] = el.value;
   });
@@ -659,7 +660,7 @@ function restaurar(){
   let data; try{ data = JSON.parse(raw); }catch(e){ return; }
 
   const legacyCarga={0:'c0',1:'c25',2:'c50',3:'c75',4:'c90',5:'c100',7:'ret75',8:'ret50',9:'ret25',10:'final0'};
-  const legacyParam={0:'rpm',1:'hz',2:'batt',3:'oilpress',4:'coolanttemp',5:'oiltemp',9:'chargev'};
+  const legacyParam={0:'rpm',2:'batt',3:'oilpress',4:'coolanttemp',9:'chargev'};
 
   Object.entries(data.campos||{}).forEach(([key,value])=>{
     let el=null;
