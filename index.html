@@ -193,12 +193,20 @@
   <div class="step" data-step="2">
     <div class="card">
       <h2 class="sec">Parámetros de Motor con Carga Continua</h2>
-      <p class="hint">Objetivo: comparar la condición del motor al iniciar una carga sostenida contra su comportamiento después de 30 min o más. Registra valores reales para identificar cambios, estabilidad o tendencias.</p>
+      <p class="hint">Objetivo: comparar la condición del motor al iniciar una carga sostenida contra su comportamiento después de 30 min o más. Registra % de carga, amperaje, potencia y tiempo real para dar contexto a la comparación.</p>
 
       <div class="grid2" style="margin:10px 0 14px">
         <div>
           <label>Carga continua aplicada (%)</label>
           <input id="cargaContinuaPct" type="number" step="any" min="0" max="100" inputmode="decimal" placeholder="Ej. 75">
+        </div>
+        <div>
+          <label>Corriente durante carga continua (A)</label>
+          <input id="cargaContinuaA" type="number" step="any" min="0" inputmode="decimal" placeholder="Ej. 420">
+        </div>
+        <div>
+          <label>Potencia durante carga continua (kW)</label>
+          <input id="cargaContinuaKw" type="number" step="any" min="0" inputmode="decimal" placeholder="Ej. 250">
         </div>
         <div>
           <label>Tiempo bajo carga continua (min)</label>
@@ -211,7 +219,7 @@
       </div>
       <div id="param-body"></div>
 
-      <div class="crit"><b>Cómo interpretarlo:</b> la columna Δ muestra el cambio entre la lectura final y la inicial. No determina por sí sola si el valor es correcto; sirve para comparar la tendencia junto con la carga aplicada, el tiempo de prueba y los límites del fabricante.</div>
+      <div class="crit"><b>Cómo interpretarlo:</b> la columna Δ muestra el cambio entre la lectura final y la inicial. No determina por sí sola si el valor es correcto; sirve para comparar la tendencia junto con la carga aplicada, el amperaje, la potencia y el tiempo real de prueba.</div>
 
       <div class="step-lbl" style="margin-top:18px">Verificación al finalizar la carga continua</div>
       <div class="hint">Confirma niveles o condiciones visibles después del periodo sostenido y documenta cualquier anomalía.</div>
