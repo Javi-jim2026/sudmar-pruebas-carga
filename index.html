@@ -204,70 +204,8 @@
     </div>
   </div>
 
-  <!-- PASO 4: CARGA SUBITA -->
+  <!-- PASO 4: ALARMAS -->
   <div class="step" data-step="3">
-    <div class="card">
-      <h2 class="sec">Prueba de Carga Súbita · Step Load Test</h2>
-      <details class="guide-box" open>
-        <summary>¿Qué significan las clases G1, G2, G3 y G4?</summary>
-        <div class="guide-content">
-          <p><b>G1:</b> clase de desempeño básica, para aplicaciones donde las variaciones transitorias de voltaje y frecuencia son menos críticas.</p>
-          <p><b>G2:</b> desempeño más exigente que G1; común en aplicaciones comerciales e industriales con cargas normales.</p>
-          <p><b>G3:</b> desempeño más estricto, usado cuando las cargas requieren mejor estabilidad de frecuencia y voltaje.</p>
-          <p><b>G4:</b> los límites no son valores genéricos fijos; se establecen por acuerdo entre fabricante y cliente/aplicación.</p>
-          <div class="guide-note"><b>No seleccionar la clase solo por el tipo de instalación.</b> Debe confirmarse en la ficha técnica, documentación del fabricante, contrato o plan de pruebas. La clase también depende del escalón de carga aplicado.</div>
-        </div>
-      </details>
-      <div>
-        <label>Clase de desempeño / criterio aplicable</label>
-        <select id="isoClase">
-          <option value="">Seleccionar criterio</option>
-          <option value="ISO 8528-5 G1">ISO 8528-5 · G1</option>
-          <option value="ISO 8528-5 G2">ISO 8528-5 · G2</option>
-          <option value="ISO 8528-5 G3">ISO 8528-5 · G3</option>
-          <option value="ISO 8528-5 G4">ISO 8528-5 · G4</option>
-          <option value="Según fabricante / contrato">Según fabricante / contrato</option>
-        </select>
-      </div>
-      <div class="grid2">
-        <div>
-          <label>Carga inicial del escalón (%)</label>
-          <input id="cargaInicial" inputmode="decimal" placeholder="Ej. 0">
-        </div>
-        <div>
-          <label>Carga final del escalón (%)</label>
-          <input id="cargaFinal" inputmode="decimal" placeholder="Ej. 50">
-        </div>
-      </div>
-      <p class="hint">Los límites transitorios no son universales: dependen de la clase de desempeño declarada, del tamaño real del escalón de carga y de la documentación del fabricante.</p>
-      <div class="crit" style="margin-bottom:10px">
-        <b>Cómo llenar la tabla:</b> captura <b>números medidos</b>, no “OK”. 
-        <b>Tiempo (s)</b> son segundos transcurridos desde el evento correspondiente: aplicación de carga o retiro de carga. 
-        “Antes de aplicar carga” inicia en <b>0 s</b>. Voltaje, frecuencia, corriente y RPM deben ser valores numéricos; usa “Observaciones” para comentarios.
-      </div>
-      <div class="tabla-wrap">
-        <table class="carga">
-          <thead>
-            <tr>
-              <th class="cond">Instante / Condición</th>
-              <th>Tiempo desde evento (s)</th><th>Voltaje (V)</th><th>Frec. (Hz)</th>
-              <th>Corr. (A)</th><th>RPM</th><th>Observaciones</th>
-            </tr>
-          </thead>
-          <tbody id="subita-body"></tbody>
-        </table>
-      </div>
-      <div class="crit"><b>Criterio técnico:</b> evaluar la prueba contra la clase de desempeño o documento de fabricante/contrato seleccionado arriba. No aplicar un único límite genérico a todos los equipos.</div>
-      <label>Resultado Carga Súbita</label>
-      <div class="dictamen" data-dict="subita">
-        <button data-v="APROBADO">APROBADO</button>
-        <button data-v="RECHAZADO">RECHAZADO</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PASO 5: ALARMAS -->
-  <div class="step" data-step="4">
     <div class="card">
       <h2 class="sec">Verificación de Alarmas y Protecciones</h2>
       <p class="hint">Captura rápida: selecciona únicamente el resultado de cada protección. OK = verificada correctamente · FALLA = no actuó como corresponde · N/A = no aplica o no se verificó dentro del alcance.</p>
@@ -275,8 +213,8 @@
     </div>
   </div>
 
-  <!-- PASO 6: RESULTADO Y FIRMAS -->
-  <div class="step" data-step="5">
+  <!-- PASO 5: RESULTADO Y FIRMAS -->
+  <div class="step" data-step="4">
     <div class="card">
       <h2 class="sec">Resultado Final</h2>
       <div class="dictamen" data-dict="final">
