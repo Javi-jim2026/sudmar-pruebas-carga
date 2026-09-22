@@ -4,7 +4,7 @@
    ============================================================ */
 
 // ---------- DEFINICIÓN DE DATOS ----------
-const STEPS = ["Datos","Carga","Motor","Alarmas","Firmas"];
+const STEPS = ["Datos","Carga","Carga continua","Alarmas","Firmas"];
 
 const CARGA_ROWS = [
   {k:"c0", c:"SIN CARGA (0%)", t:""},
@@ -89,12 +89,25 @@ function buildParams(){
   pb.innerHTML = PARAMS.map(p=>`
     <div class="param-row">
       <span class="pname">${p.n}</span>
-      <input class="plim" data-paramlim="${p.k}-min" inputmode="decimal" placeholder="Ref.">
-      <input class="plim" data-paramlim="${p.k}-max" inputmode="decimal" placeholder="Ref.">
-      <input data-param="${p.k}-1" inputmode="decimal">
-      <input data-param="${p.k}-2" inputmode="decimal">
-      <input data-param="${p.k}-3" inputmode="decimal">
+      <input data-param="${p.k}-1" type="number" step="any" inputmode="decimal" placeholder="Inicial">
+      <input data-param="${p.k}-3" type="number" step="any" inputmode="decimal" placeholder="≥30 min">
+      <span class="param-delta" data-paramdelta="${p.k}">—</span>
     </div>`).join('');
+  updateParamDeltas();
+}
+
+function updateParamDeltas(){
+  PARAMS.forEach(p=>{
+    const a=parseFloat(paramV(`${p.k}-1`));
+    const b=parseFloat(paramV(`${p.k}-3`));
+    const out=document.querySelector(`[data-paramdelta="${p.k}"]`);
+    if(!out) return;
+    if(Number.isFinite(a)&&Number.isFinite(b)){
+      const d=b-a;
+      const decimals=Math.abs(d)<10 ? 2 : 1;
+      out.textContent=(d>0?'+':'')+d.toFixed(decimals);
+    }else out.textContent='—';
+  });
 }
 
 function buildChecks(){
@@ -256,11 +269,15 @@ const HELP = {
     `
   },
   motor:{
-    title:'Ayuda · Parámetros de motor',
+    title:'Ayuda · Motor con carga continua',
     body:`
-      <div class="help-item"><b>Lecturas 1, 2 y 3.</b> Son tres puntos de observación durante la prueba para comparar estabilidad y tendencia.</div>
-      <div class="help-item"><b>Mín./Máx. de referencia.</b> Captura los límites aplicables de la ficha técnica, manual del motor o plan de pruebas. Se dejan editables porque no son universales entre motores y sistemas de 12/24 V.</div>
-      <div class="help-item"><b>Verificaciones previas.</b> Combustible, refrigerante y aceite se registran aparte porque son condiciones de inspección y no variables dinámicas equivalentes a RPM, presión o temperatura.</div>
+      <div class="help-item"><b>Objetivo.</b> Comparar el comportamiento del motor al iniciar una carga sostenida y después de 30 minutos o más, en lugar de repetir lecturas sin contexto.</div>
+      <div class="help-item"><b>Carga continua aplicada.</b> Registra el porcentaje real de carga que se mantuvo durante el periodo de observación.</div>
+      <div class="help-item"><b>Tiempo bajo carga.</b> Captura los minutos reales transcurridos. Para esta comparación se busca una permanencia de 30 min o más.</div>
+      <div class="help-item"><b>Inicio / después de ≥30 min.</b> Registra las lecturas reales del mismo parámetro en ambos momentos para poder observar tendencia.</div>
+      <div class="help-item"><b>Δ Cambio.</b> Se calcula automáticamente como lectura final menos lectura inicial. Es una comparación, no un criterio automático de aprobación.</div>
+      <div class="help-item"><b>Evaluación.</b> Interpreta los cambios con la carga aplicada, las condiciones ambientales y los límites específicos del fabricante del motor.</div>
+      <div class="help-item"><b>Verificación final.</b> Después del periodo sostenido revisa combustible, refrigerante y aceite y documenta cualquier anomalía visible.</div>
     `
   },
   alarmas:{
@@ -374,7 +391,6 @@ const val = sel => (document.querySelector(sel)?.value||"").trim();
 const g = id => val('#'+id);
 const cargaV = k => val(`[data-carga="${k}"]`);
 const paramV = k => val(`[data-param="${k}"]`);
-const paramLim = k => val(`[data-paramlim="${k}"]`);
 const checkV = k => val(`[data-check="${k}"]`);
 const segV = k => document.querySelector(`[data-seg="${k}"]`)?.dataset.val||"";
 const firmaN = k => val(`[data-firma="${k}-nombre"]`);
@@ -460,18 +476,35 @@ function generarPDF(){
   doc.addPage(); encabezado();
   const colL=4, colLW=W-8;
 
-  bandaTitulo(22,'PARÁMETROS DE MOTOR',AZUL2,colL,colLW,9);
-  const paramHead=[['PARÁMETRO','MÍN','MÁX','LECT. 1','LECT. 2','LECT. 3']];
-  const paramBody=PARAMS.map(p=>[p.n,paramLim(`${p.k}-min`),paramLim(`${p.k}-max`),paramV(`${p.k}-1`),paramV(`${p.k}-2`),paramV(`${p.k}-3`)]);
+  bandaTitulo(22,'PARÁMETROS DE MOTOR CON CARGA CONTINUA',AZUL2,colL,colLW,9);
+  const cargaContPct=g('cargaContinuaPct')||'—';
+  const cargaContMin=g('cargaContinuaMin')||'—';
   doc.autoTable({
-    startY:30, margin:{left:colL,right:4}, tableWidth:colLW, head:paramHead, body:paramBody, theme:'grid',
+    startY:30, margin:{left:colL,right:4}, tableWidth:colLW,
+    body:[['Carga continua aplicada:',cargaContPct+' %','Tiempo bajo carga:',cargaContMin+' min']],
+    theme:'grid',
+    styles:{fontSize:7,cellPadding:1.2,lineColor:[217,222,230],lineWidth:0.1},
+    columnStyles:{0:{fontStyle:'bold',fillColor:GRIS,cellWidth:52},1:{halign:'center',cellWidth:40},2:{fontStyle:'bold',fillColor:GRIS,cellWidth:52},3:{halign:'center'}}
+  });
+
+  const deltaTxt=p=>{
+    const ini=parseFloat(paramV(`${p.k}-1`));
+    const fin=parseFloat(paramV(`${p.k}-3`));
+    if(!Number.isFinite(ini)||!Number.isFinite(fin)) return '—';
+    const d=fin-ini;
+    return (d>0?'+':'')+d.toFixed(Math.abs(d)<10?2:1);
+  };
+  const paramHead=[['PARÁMETRO','INICIO CARGA CONTINUA','DESPUÉS DE ≥30 MIN','Δ CAMBIO']];
+  const paramBody=PARAMS.map(p=>[p.n,paramV(`${p.k}-1`),paramV(`${p.k}-3`),deltaTxt(p)]);
+  doc.autoTable({
+    startY:doc.lastAutoTable.finalY+2, margin:{left:colL,right:4}, tableWidth:colLW, head:paramHead, body:paramBody, theme:'grid',
     headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.6,halign:'center'},
     styles:{fontSize:6.8,cellPadding:1.1,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
-    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:70},1:{fillColor:GRIS},2:{fillColor:GRIS}}
+    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:95},3:{fillColor:GRIS,fontStyle:'bold'}}
   });
   let leftY=doc.lastAutoTable.finalY+3;
 
-  bandaTitulo(leftY,'VERIFICACIONES PREVIAS',AZUL2,colL,colLW,8);
+  bandaTitulo(leftY,'VERIFICACIÓN AL FINALIZAR CARGA CONTINUA',AZUL2,colL,colLW,8);
   const checkBody=CHECKS.map(c=>[c.n,checkV(`${c.k}-v`),checkV(`${c.k}-obs`)]);
   doc.autoTable({
     startY:leftY+8, margin:{left:colL,right:4}, tableWidth:colLW,
@@ -673,6 +706,7 @@ function restaurar(){
 
   window._firmasGuardadas=data.firmas||{};
   updateFirmaVisibility();
+  updateParamDeltas();
 }
 
 // pinta firmas restauradas en canvas ya visibles
@@ -700,7 +734,10 @@ function nuevoReporte(){
 }
 
 // engancha autoguardado a toda interacción
-document.addEventListener('input', guardarDebounced);
+document.addEventListener('input', e=>{
+  if(e.target.matches('[data-param]')) updateParamDeltas();
+  guardarDebounced();
+});
 document.addEventListener('click', e=>{
   if(e.target.closest('.seg button')||e.target.closest('.dictamen button')) guardarDebounced();
 });
