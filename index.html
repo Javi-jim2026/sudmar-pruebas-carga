@@ -52,7 +52,7 @@
   .param-row input.plim{background:#eef1f5;color:#52606d;font-size:11px}
   .param-head{display:grid;grid-template-columns:1.6fr .7fr .7fr 1fr 1fr 1fr;gap:5px;font-size:9px;font-weight:700;color:var(--azul);text-transform:uppercase;padding-bottom:6px;text-align:center}
   .param-head span:first-child{text-align:left}
-  .alarma{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--gris)}
+  .alarma{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(220px,1fr);gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--gris)}
   .alarma .aname{font-size:11px;font-weight:600}
   .seg{display:flex;border:1px solid var(--bord);border-radius:6px;overflow:hidden}
   .seg button{flex:1;border:none;background:#fff;padding:7px 2px;font-size:11px;font-weight:600;color:#7b8794;cursor:pointer}
@@ -111,7 +111,7 @@
   .guide-content p{margin:7px 0}
   .guide-content b{color:var(--azul)}
   .guide-note{margin-top:8px;padding:8px 10px;background:#fff9e6;border-radius:7px;color:#6d5b1b}
-  @media(max-width:800px){.firmas-grid,.firmas-grid.three{grid-template-columns:1fr}.check-head,.check-row{grid-template-columns:1fr}.check-head{display:none}}
+  @media(max-width:800px){.firmas-grid,.firmas-grid.three{grid-template-columns:1fr}.check-head,.check-row{grid-template-columns:1fr}.check-head{display:none}.alarma{grid-template-columns:1fr;gap:6px}}
 </style>
 </head>
 <body>
@@ -270,6 +270,7 @@
   <div class="step" data-step="4">
     <div class="card">
       <h2 class="sec">Verificación de Alarmas y Protecciones</h2>
+      <p class="hint">Captura rápida: selecciona únicamente el resultado de cada protección. OK = verificada correctamente · FALLA = no actuó como corresponde · N/A = no aplica o no se verificó dentro del alcance.</p>
       <div id="alarma-body"></div>
     </div>
   </div>
