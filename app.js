@@ -140,19 +140,7 @@ function buildAlarmas(){
     <div class="alarma">
       <span class="aname">${a}</span>
       <div>
-        <div class="seg-lbl">Config.</div>
-        <div class="seg" data-seg="${i}-conf">
-          <button data-v="Sí">Sí</button><button data-v="No">No</button><button data-v="N/A">N/A</button>
-        </div>
-      </div>
-      <div>
-        <div class="seg-lbl">Probado</div>
-        <div class="seg" data-seg="${i}-prob">
-          <button data-v="Sí">Sí</button><button data-v="No">No</button><button data-v="N/A">N/A</button>
-        </div>
-      </div>
-      <div>
-        <div class="seg-lbl">Result.</div>
+        <div class="seg-lbl">Resultado</div>
         <div class="seg" data-seg="${i}-res">
           <button data-v="OK">OK</button><button data-v="FALLA">FALLA</button><button data-v="N/A">N/A</button>
         </div>
@@ -321,9 +309,10 @@ const HELP = {
   alarmas:{
     title:'Ayuda · Alarmas y protecciones',
     body:`
-      <div class="help-item"><b>Configurado.</b> La protección o función existe y está habilitada/configurada en el equipo.</div>
-      <div class="help-item"><b>Probado.</b> La función fue realmente verificada durante esta intervención.</div>
-      <div class="help-item"><b>Resultado.</b> OK si la prueba fue satisfactoria; FALLA si no actuó correctamente; N/A cuando la función no aplica al alcance o configuración del equipo.</div>
+      <div class="help-item"><b>Captura rápida.</b> Solo se registra un resultado por alarma o protección para evitar llenar campos repetitivos en campo.</div>
+      <div class="help-item"><b>OK.</b> La función o protección fue verificada y respondió correctamente.</div>
+      <div class="help-item"><b>FALLA.</b> La función se verificó y no respondió como corresponde, o se detectó una condición incorrecta.</div>
+      <div class="help-item"><b>N/A.</b> No aplica a la configuración del equipo o no forma parte del alcance de esta prueba.</div>
       <div class="help-item"><b>AMF.</b> Automatic Mains Failure: lógica de arranque automático ante pérdida o falla de red.</div>
       <div class="help-item"><b>ATS / Transferencia.</b> Automatic Transfer Switch: tablero o sistema que transfiere la carga entre red y generador cuando aplica.</div>
     `
@@ -538,15 +527,15 @@ function generarPDF(){
   leftY=doc.lastAutoTable.finalY+3;
 
   bandaTitulo(leftY,'VERIFICACIÓN DE ALARMAS Y PROTECCIONES',AZUL2,colL,colLW,8);
-  const alBody=ALARMAS.map((a,i)=>[a,segV(`${i}-conf`),segV(`${i}-prob`),segV(`${i}-res`)]);
+  const alBody=ALARMAS.map((a,i)=>[a,segV(`${i}-res`)]);
   doc.autoTable({
     startY:leftY+8, margin:{left:colL}, tableWidth:colLW,
-    head:[['ALARMA / PROTECCIÓN','CONF.','PROB.','RESULT.']], body:alBody, theme:'grid',
+    head:[['ALARMA / PROTECCIÓN','RESULTADO']], body:alBody, theme:'grid',
     headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.2,halign:'center'},
-    styles:{fontSize:6.35,cellPadding:0.9,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
-    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:72}},
+    styles:{fontSize:6.6,cellPadding:1.1,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
+    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:102},1:{cellWidth:38}},
     didParseCell:d=>{
-      if(d.section==='body'&&d.column.index===3){
+      if(d.section==='body'&&d.column.index===1){
         if(d.cell.raw==='OK'){d.cell.styles.textColor=VERDE;d.cell.styles.fontStyle='bold';}
         if(d.cell.raw==='FALLA'){d.cell.styles.textColor=ROJO;d.cell.styles.fontStyle='bold';}
         if(d.cell.raw==='N/A'){d.cell.styles.textColor=NEUTRO;d.cell.styles.fontStyle='bold';}
