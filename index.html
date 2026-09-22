@@ -36,7 +36,7 @@
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
   @media(max-width:600px){.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}}
   .tabla-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:0 16px}
-  table.carga{border-collapse:collapse;width:100%;min-width:760px;font-size:12px}
+  table.carga{border-collapse:collapse;width:100%;min-width:680px;font-size:12px}
   table.carga th{background:var(--azul);color:#fff;padding:7px 5px;font-size:10px;font-weight:600;text-align:center;position:sticky;left:0}
   table.carga th.cond{text-align:left;min-width:150px;left:0;z-index:2}
   table.carga td{border:1px solid var(--bord);padding:2px}
@@ -179,8 +179,7 @@
               <th class="cond">Condición</th>
               <th>Tiempo real (s)</th><th>Voltaje L-L (V)</th>
               <th>Corr. L1 (A)</th><th>Corr. L2 (A)</th><th>Corr. L3 (A)</th>
-              <th>Potencia (kW)</th><th>Frec. (Hz)</th><th>RPM</th>
-              <th>Presión (bar)</th><th>Temp. agua (°C)</th><th>Observaciones</th>
+              <th>Potencia (kW)</th><th>Frec. (Hz)</th><th>Observaciones</th>
             </tr>
           </thead>
           <tbody id="carga-body"></tbody>
@@ -221,8 +220,8 @@
 
       <div class="crit"><b>Cómo interpretarlo:</b> la columna Δ muestra el cambio entre la lectura final y la inicial. No determina por sí sola si el valor es correcto; sirve para comparar la tendencia junto con la carga aplicada, el amperaje, la potencia y el tiempo real de prueba.</div>
 
-      <div class="step-lbl" style="margin-top:18px">Verificación al finalizar la carga continua</div>
-      <div class="hint">Confirma niveles o condiciones visibles después del periodo sostenido y documenta cualquier anomalía.</div>
+      <div class="step-lbl" style="margin-top:18px">Verificación física al finalizar la carga continua</div>
+      <div class="hint">Después del periodo sostenido, confirma niveles y revisa si apareció alguna condición física anormal. En las verificaciones de condición, OK significa comportamiento normal.</div>
       <div id="check-body" class="checks"></div>
     </div>
   </div>
