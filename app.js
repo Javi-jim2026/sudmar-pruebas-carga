@@ -4,7 +4,7 @@
    ============================================================ */
 
 // ---------- DEFINICIÓN DE DATOS ----------
-const STEPS = ["Datos","Carga","Motor","C. Súbita","Alarmas","Firmas"];
+const STEPS = ["Datos","Carga","Motor","Alarmas","Firmas"];
 
 const CARGA_ROWS = [
   {k:"c0", c:"SIN CARGA (0%)", t:""},
@@ -35,18 +35,6 @@ const CHECKS = [
   {k:"oil", n:"Nivel de aceite motor", type:"status"},
 ];
 
-const SUBITA_ROWS = [
-  {k:"pre", c:"Antes de aplicar carga", t:"0"},
-  {k:"dip", c:"Caída inmediata de voltaje", t:""},
-  {k:"minv", c:"Mínimo voltaje transitorio", t:""},
-  {k:"recp", c:"Recuperación parcial", t:""},
-  {k:"rec90", c:"Recuperación 90%", t:""},
-  {k:"stab", c:"Estabilización", t:""},
-  {k:"steady", c:"Régimen estable carga aplicada", t:""},
-  {k:"reject", c:"Retiro carga – sobretensión", t:""},
-  {k:"post", c:"Estabilización post-descarga", t:""},
-];
-
 const ALARMAS = [
   "Sobrevelocidad",
   "Baja presión de aceite",
@@ -68,7 +56,7 @@ const FIRMAS = [
 
 // ---------- ESTADO ----------
 let current = 0;
-const state = { dict:{subita:"", final:""} };
+const state = { dict:{final:""} };
 const sigPads = {};
 
 // ---------- CONSTRUCCIÓN DINÁMICA ----------
@@ -118,20 +106,6 @@ function buildChecks(){
         : `<input data-check="${c.k}-v" inputmode="decimal" placeholder="${c.placeholder||''}">`;
       return `<div class="check-row"><strong>${c.n}</strong>${control}<input data-check="${c.k}-obs" placeholder="Observaciones"></div>`;
     }).join('');
-}
-
-function buildSubita(){
-  const tb = document.getElementById('subita-body');
-  tb.innerHTML = SUBITA_ROWS.map(r=>`
-    <tr>
-      <td class="cond">${r.c}</td>
-      <td><input data-sub="${r.k}-t" value="${r.t}" type="number" step="any" min="0" inputmode="decimal" ${r.k==='pre'?'readonly':''} placeholder="s"></td>
-      <td><input data-sub="${r.k}-v" type="number" step="any" min="0" inputmode="decimal" placeholder="V"></td>
-      <td><input data-sub="${r.k}-hz" type="number" step="any" min="0" inputmode="decimal" placeholder="Hz"></td>
-      <td><input data-sub="${r.k}-a" type="number" step="any" min="0" inputmode="decimal" placeholder="A"></td>
-      <td><input data-sub="${r.k}-rpm" type="number" step="any" min="0" inputmode="decimal" placeholder="RPM"></td>
-      <td><input data-sub="${r.k}-obs" placeholder="Comentario / condición"></td>
-    </tr>`).join('');
 }
 
 function buildAlarmas(){
@@ -249,7 +223,7 @@ const HELP = {
   general:{
     title:'Ayuda · Reporte de pruebas con carga',
     body:`
-      <div class="help-item"><b>Objetivo del reporte.</b> Documentar condiciones de prueba, valores eléctricos y mecánicos, protecciones, carga súbita y firmas de conformidad.</div>
+      <div class="help-item"><b>Objetivo del reporte.</b> Documentar condiciones de prueba, valores eléctricos y mecánicos, protecciones y firmas de conformidad.</div>
       <div class="help-item"><b>Regla principal.</b> Los límites del fabricante, la ficha técnica, el plan de pruebas y el criterio contractual prevalecen sobre valores genéricos del formato.</div>
       <div class="help-item"><b>Datos reales.</b> Registra los tiempos y valores realmente observados; el formato no impone una duración universal para cada escalón.</div>
       <div class="help-item"><b>Siglas frecuentes.</b> PRP/LTP/ESP/COP describen ratings de potencia; FP o cosφ es factor de potencia; L-L significa tensión línea a línea; AMF es arranque por falla de red y ATS es transferencia automática.</div>
@@ -287,23 +261,6 @@ const HELP = {
       <div class="help-item"><b>Lecturas 1, 2 y 3.</b> Son tres puntos de observación durante la prueba para comparar estabilidad y tendencia.</div>
       <div class="help-item"><b>Mín./Máx. de referencia.</b> Captura los límites aplicables de la ficha técnica, manual del motor o plan de pruebas. Se dejan editables porque no son universales entre motores y sistemas de 12/24 V.</div>
       <div class="help-item"><b>Verificaciones previas.</b> Combustible, refrigerante y aceite se registran aparte porque son condiciones de inspección y no variables dinámicas equivalentes a RPM, presión o temperatura.</div>
-    `
-  },
-  subita:{
-    title:'Ayuda · Carga súbita',
-    body:`
-      <div class="help-item"><b>Carga súbita.</b> Aplicación o retiro rápido de un escalón de carga para observar la respuesta transitoria del generador. Registra el porcentaje inicial y final para dejar documentado el tamaño real del escalón.</div>
-      <div class="help-item"><b>Mínimo voltaje transitorio.</b> Menor tensión registrada inmediatamente después de aplicar el escalón.</div>
-      <div class="help-item"><b>Recuperación.</b> Tiempo requerido para volver a la banda de estabilidad definida por la clase de desempeño o por el fabricante.</div>
-      <div class="help-item"><b>ISO 8528-5.</b> La norma utiliza clases de desempeño; no existe un único límite válido para todos los grupos. Selecciona la clase declarada o usa la referencia contractual/fabricante.</div>
-      <div class="help-item"><b>G1.</b> Clase básica de desempeño, para aplicaciones donde las variaciones transitorias de voltaje y frecuencia son menos críticas.</div>
-      <div class="help-item"><b>G2.</b> Desempeño más exigente que G1, habitual en aplicaciones comerciales e industriales con cargas normales.</div>
-      <div class="help-item"><b>G3.</b> Requisitos más estrictos de estabilidad y respuesta transitoria para cargas más sensibles.</div>
-      <div class="help-item"><b>G4.</b> Sus límites se establecen por acuerdo entre fabricante y cliente/aplicación; no debe interpretarse como una tabla universal con valores fijos.</div>
-      <div class="help-item"><b>Cómo elegir la clase.</b> No la selecciones únicamente por el tipo de instalación. Confirma la clase en ficha técnica, documentación del fabricante, contrato o plan de pruebas y registra el escalón real aplicado.</div>
-      <div class="help-item"><b>Tiempo desde evento (s).</b> Captura segundos, no “OK”. Para la aplicación de carga, cuenta desde el instante en que entra el escalón; para el retiro, vuelve a contar desde el instante en que se retira la carga. “Antes de aplicar carga” queda en 0 s.</div>
-      <div class="help-item"><b>Voltaje / Frecuencia / Corriente / RPM.</b> Son lecturas numéricas reales tomadas en cada instante. Si no fue posible medir un valor, déjalo vacío y explícalo en Observaciones.</div>
-      <div class="help-item"><b>Observaciones.</b> Es el único campo de texto libre por fila. Úsalo para indicar comportamiento, alarma, oscilación, recuperación irregular o cualquier condición relevante.</div>
     `
   },
   alarmas:{
@@ -344,7 +301,7 @@ function setupHelp(){
   modal.addEventListener('click',e=>{ if(e.target===modal) closeHelp(); });
   document.body.appendChild(modal);
 
-  const topicByStep = {0:'datos',1:'carga',2:'motor',3:'subita',4:'alarmas',5:'firmas'};
+  const topicByStep = {0:'datos',1:'carga',2:'motor',3:'alarmas',4:'firmas'};
   document.querySelectorAll('.step').forEach(step=>{
     const h=step.querySelector('h2.sec');
     if(!h) return;
@@ -419,7 +376,6 @@ const cargaV = k => val(`[data-carga="${k}"]`);
 const paramV = k => val(`[data-param="${k}"]`);
 const paramLim = k => val(`[data-paramlim="${k}"]`);
 const checkV = k => val(`[data-check="${k}"]`);
-const subV = k => val(`[data-sub="${k}"]`);
 const segV = k => document.querySelector(`[data-seg="${k}"]`)?.dataset.val||"";
 const firmaN = k => val(`[data-firma="${k}-nombre"]`);
 
@@ -502,38 +458,38 @@ function generarPDF(){
 
   // ===================== PÁGINA 2 =====================
   doc.addPage(); encabezado();
-  const colL=4, colLW=140, colR=147, colRW=W-colR-4;
+  const colL=4, colLW=W-8;
 
   bandaTitulo(22,'PARÁMETROS DE MOTOR',AZUL2,colL,colLW,9);
   const paramHead=[['PARÁMETRO','MÍN','MÁX','LECT. 1','LECT. 2','LECT. 3']];
   const paramBody=PARAMS.map(p=>[p.n,paramLim(`${p.k}-min`),paramLim(`${p.k}-max`),paramV(`${p.k}-1`),paramV(`${p.k}-2`),paramV(`${p.k}-3`)]);
   doc.autoTable({
-    startY:30, margin:{left:colL}, tableWidth:colLW, head:paramHead, body:paramBody, theme:'grid',
-    headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.4,halign:'center'},
-    styles:{fontSize:6.6,cellPadding:1.0,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
-    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:52},1:{fillColor:GRIS},2:{fillColor:GRIS}}
+    startY:30, margin:{left:colL,right:4}, tableWidth:colLW, head:paramHead, body:paramBody, theme:'grid',
+    headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.6,halign:'center'},
+    styles:{fontSize:6.8,cellPadding:1.1,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
+    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:70},1:{fillColor:GRIS},2:{fillColor:GRIS}}
   });
   let leftY=doc.lastAutoTable.finalY+3;
 
   bandaTitulo(leftY,'VERIFICACIONES PREVIAS',AZUL2,colL,colLW,8);
   const checkBody=CHECKS.map(c=>[c.n,checkV(`${c.k}-v`),checkV(`${c.k}-obs`)]);
   doc.autoTable({
-    startY:leftY+8, margin:{left:colL}, tableWidth:colLW,
+    startY:leftY+8, margin:{left:colL,right:4}, tableWidth:colLW,
     head:[['VERIFICACIÓN','VALOR / ESTADO','OBSERVACIONES']], body:checkBody, theme:'grid',
-    headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.2,halign:'center'},
-    styles:{fontSize:6.5,cellPadding:1.0,lineColor:[217,222,230],lineWidth:0.1},
-    columnStyles:{0:{fontStyle:'bold',cellWidth:52},1:{halign:'center',cellWidth:32}}
+    headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.4,halign:'center'},
+    styles:{fontSize:6.8,cellPadding:1.1,lineColor:[217,222,230],lineWidth:0.1},
+    columnStyles:{0:{fontStyle:'bold',cellWidth:80},1:{halign:'center',cellWidth:55}}
   });
   leftY=doc.lastAutoTable.finalY+3;
 
   bandaTitulo(leftY,'VERIFICACIÓN DE ALARMAS Y PROTECCIONES',AZUL2,colL,colLW,8);
   const alBody=ALARMAS.map((a,i)=>[a,segV(`${i}-res`)]);
   doc.autoTable({
-    startY:leftY+8, margin:{left:colL}, tableWidth:colLW,
+    startY:leftY+8, margin:{left:colL,right:4}, tableWidth:colLW,
     head:[['ALARMA / PROTECCIÓN','RESULTADO']], body:alBody, theme:'grid',
-    headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.2,halign:'center'},
-    styles:{fontSize:6.6,cellPadding:1.1,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
-    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:102},1:{cellWidth:38}},
+    headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.4,halign:'center'},
+    styles:{fontSize:6.8,cellPadding:1.1,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
+    columnStyles:{0:{halign:'left',fontStyle:'bold'},1:{cellWidth:55}},
     didParseCell:d=>{
       if(d.section==='body'&&d.column.index===1){
         if(d.cell.raw==='OK'){d.cell.styles.textColor=VERDE;d.cell.styles.fontStyle='bold';}
@@ -544,40 +500,7 @@ function generarPDF(){
   });
   const alarmEnd=doc.lastAutoTable.finalY;
 
-  bandaTitulo(22,'PRUEBA DE CARGA SÚBITA (STEP LOAD TEST)',AZUL2,colR,colRW,9);
-  const subHead=[['INSTANTE / CONDICIÓN','TIEMPO\nDESDE EVENTO (s)','VOLTAJE\n(V)','FREC.\n(Hz)','CORR.\n(A)','RPM','OBS.']];
-  const subBody=SUBITA_ROWS.map(r=>[r.c,subV(`${r.k}-t`),subV(`${r.k}-v`),subV(`${r.k}-hz`),subV(`${r.k}-a`),subV(`${r.k}-rpm`),subV(`${r.k}-obs`)]);
-  doc.autoTable({
-    startY:30, margin:{left:colR}, tableWidth:colRW, head:subHead, body:subBody, theme:'grid',
-    headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6,halign:'center',valign:'middle'},
-    styles:{fontSize:6.5,cellPadding:1.0,lineColor:[217,222,230],lineWidth:0.1,halign:'center'},
-    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:42}}
-  });
-
-  let rightY=doc.lastAutoTable.finalY+3;
-  bandaTitulo(rightY,'CRITERIO DE ACEPTACIÓN APLICADO',AZUL2,colR,colRW,7.5);
-  const critBody=[
-    ['Clase / criterio:',g('isoClase')||'No especificado'],
-    ['Escalón de carga:',`${g('cargaInicial')||'—'}% → ${g('cargaFinal')||'—'}%`],
-    ['Criterio de evaluación:','Aplicar límites de la clase o criterio seleccionado'],
-    ['RESULTADO CARGA SÚBITA:',state.dict.subita||'—']
-  ];
-  doc.autoTable({
-    startY:rightY+8, margin:{left:colR}, tableWidth:colRW, body:critBody, theme:'grid',
-    styles:{fontSize:6.6,cellPadding:1.2,lineColor:[217,222,230],lineWidth:0.1},
-    columnStyles:{0:{fontStyle:'bold',fillColor:GRIS,cellWidth:60},1:{halign:'center'}},
-    didParseCell:d=>{
-      if(d.row.index===3&&d.column.index===1){
-        d.cell.styles.fontStyle='bold';
-        if(d.cell.raw==='APROBADO'){d.cell.styles.fillColor=VERDE;d.cell.styles.textColor=[255,255,255];}
-        else if(d.cell.raw==='RECHAZADO'){d.cell.styles.fillColor=ROJO;d.cell.styles.textColor=[255,255,255];}
-        else d.cell.styles.textColor=NEUTRO;
-      }
-    }
-  });
-  const critEnd=doc.lastAutoTable.finalY;
-
-  let yF=Math.max(alarmEnd,critEnd)+4;
+  let yF=alarmEnd+4;
   const firmasActivas=FIRMAS.filter(f=>!f.optional || g('firmaEndress')==='si');
   const resultColor=state.dict.final==='APROBADO'?VERDE:state.dict.final==='CORRECCIONES'?ROJO:NEUTRO;
   const finalTxt=state.dict.final==='APROBADO'
@@ -795,7 +718,6 @@ buildProgress();
 buildCarga();
 buildParams();
 buildChecks();
-buildSubita();
 buildAlarmas();
 buildFirmas();
 setupHelp();
