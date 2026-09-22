@@ -7,26 +7,26 @@
 const STEPS = ["Datos","Carga","Motor","C. Súbita","Alarmas","Firmas"];
 
 const CARGA_ROWS = [
-  {k:"c0", c:"SIN CARGA (0%)", t:"25"},
-  {k:"c25", c:"25% DE CARGA", t:"25"},
-  {k:"c50", c:"50% DE CARGA", t:"25"},
-  {k:"c75", c:"75% DE CARGA", t:"25"},
-  {k:"c90", c:"90% DE CARGA", t:"25"},
-  {k:"c100", c:"100% DE CARGA NOMINAL", t:"125"},
-  {k:"ret75", c:"RETORNO 75% CARGA", t:"25"},
-  {k:"ret50", c:"RETORNO 50% CARGA", t:"25"},
-  {k:"ret25", c:"RETORNO 25% CARGA", t:"25"},
-  {k:"final0", c:"SIN CARGA FINAL (0%)", t:"25"},
+  {k:"c0", c:"SIN CARGA (0%)", t:""},
+  {k:"c25", c:"25% DE CARGA", t:""},
+  {k:"c50", c:"50% DE CARGA", t:""},
+  {k:"c75", c:"75% DE CARGA", t:""},
+  {k:"c90", c:"90% DE CARGA", t:""},
+  {k:"c100", c:"100% DE CARGA NOMINAL", t:""},
+  {k:"ret75", c:"RETORNO 75% CARGA", t:""},
+  {k:"ret50", c:"RETORNO 50% CARGA", t:""},
+  {k:"ret25", c:"RETORNO 25% CARGA", t:""},
+  {k:"final0", c:"SIN CARGA FINAL (0%)", t:""},
 ];
 
 const PARAMS = [
-  {k:"rpm", n:"Velocidad rotación (RPM)", min:"1764", max:"1836"},
-  {k:"hz", n:"Frecuencia generada (Hz)", min:"58.8", max:"61.2"},
-  {k:"batt", n:"Voltaje baterías (V DC)", min:"24.0", max:"30.0"},
-  {k:"oilpress", n:"Presión aceite motor (bar)", min:"2.0", max:"6.0"},
-  {k:"coolanttemp", n:"Temp. agua/refrigerante (°C)", min:"70", max:"95"},
-  {k:"oiltemp", n:"Temp. aceite motor (°C)", min:"70", max:"120"},
-  {k:"chargev", n:"Voltaje carga alternador (V DC)", min:"27.0", max:"29.0"},
+  {k:"rpm", n:"Velocidad rotación (RPM)"},
+  {k:"hz", n:"Frecuencia generada (Hz)"},
+  {k:"batt", n:"Voltaje baterías (V DC)"},
+  {k:"oilpress", n:"Presión aceite motor (bar)"},
+  {k:"coolanttemp", n:"Temp. agua/refrigerante (°C)"},
+  {k:"oiltemp", n:"Temp. aceite motor (°C)"},
+  {k:"chargev", n:"Voltaje carga alternador (V DC)"},
 ];
 
 const CHECKS = [
@@ -42,7 +42,7 @@ const SUBITA_ROWS = [
   {k:"recp", c:"Recuperación parcial", t:""},
   {k:"rec90", c:"Recuperación 90%", t:""},
   {k:"stab", c:"Estabilización", t:""},
-  {k:"steady", c:"Régimen estable 100% carga", t:""},
+  {k:"steady", c:"Régimen estable carga aplicada", t:""},
   {k:"reject", c:"Retiro carga – sobretensión", t:""},
   {k:"post", c:"Estabilización post-descarga", t:""},
 ];
@@ -61,7 +61,7 @@ const ALARMAS = [
 ];
 
 const FIRMAS = [
-  {k:"comisionador", t:"Técnico Responsable Sudmar"},
+  {k:"comisionador", t:"Técnico Sudmar / Endress"},
   {k:"cliente", t:"Representante del Cliente"},
   {k:"endress", t:"Representante de Marca Endress", optional:true},
 ];
@@ -101,8 +101,8 @@ function buildParams(){
   pb.innerHTML = PARAMS.map(p=>`
     <div class="param-row">
       <span class="pname">${p.n}</span>
-      <span class="lim">${p.min}</span>
-      <span class="lim">${p.max}</span>
+      <input class="plim" data-paramlim="${p.k}-min" inputmode="decimal" placeholder="Ref.">
+      <input class="plim" data-paramlim="${p.k}-max" inputmode="decimal" placeholder="Ref.">
       <input data-param="${p.k}-1" inputmode="decimal">
       <input data-param="${p.k}-2" inputmode="decimal">
       <input data-param="${p.k}-3" inputmode="decimal">
@@ -263,14 +263,14 @@ const HELP = {
     body:`
       <div class="help-item"><b>Objetivo del reporte.</b> Documentar condiciones de prueba, valores eléctricos y mecánicos, protecciones, carga súbita y firmas de conformidad.</div>
       <div class="help-item"><b>Regla principal.</b> Los límites del fabricante, la ficha técnica, el plan de pruebas y el criterio contractual prevalecen sobre valores genéricos del formato.</div>
-      <div class="help-item"><b>Datos reales.</b> Registra el tiempo y los valores realmente observados. Los tiempos precargados en la tabla de carga son editables.</div>
+      <div class="help-item"><b>Datos reales.</b> Registra los tiempos y valores realmente observados; el formato no impone una duración universal para cada escalón.</div>
     `
   },
   datos:{
     title:'Ayuda · Datos generales',
     body:`
       <div class="help-item"><b>Potencia nominal.</b> Captura la potencia indicada en placa o ficha técnica, expresada en kVA/kW. La clasificación puede ser PRP, LTP, ESP u otra según fabricante.</div>
-      <div class="help-item"><b>Corriente nominal Cosφ 0.8.</b> Es la corriente nominal asociada a la potencia aparente del generador con factor de potencia 0.8. Un banco resistivo trabaja aproximadamente a FP=1 y no reproduce carga reactiva.</div>
+      <div class="help-item"><b>Corriente nominal.</b> Captura la corriente indicada en placa o ficha técnica. No la confundas con la corriente observada durante un escalón de kW en un banco resistivo.</div>
       <div class="help-item"><b>Controlador / Panel.</b> Módulo electrónico que gestiona arranque, paro, alarmas, protecciones y mediciones.</div>
       <div class="help-item"><b>Interruptor principal.</b> Protección de salida del generador (MCCB/ACB u otro interruptor principal).</div>
       <div class="help-item"><b>OdL.</b> Orden de trabajo u orden de servicio asociada a la intervención.</div>
@@ -291,14 +291,14 @@ const HELP = {
     title:'Ayuda · Parámetros de motor',
     body:`
       <div class="help-item"><b>Lecturas 1, 2 y 3.</b> Son tres puntos de observación durante la prueba para comparar estabilidad y tendencia.</div>
-      <div class="help-item"><b>Mín/Máx.</b> Son referencias del formato. Si la ficha técnica del motor establece otro límite, utiliza el del fabricante y documéntalo.</div>
+      <div class="help-item"><b>Mín./Máx. de referencia.</b> Captura los límites aplicables de la ficha técnica, manual del motor o plan de pruebas. Se dejan editables porque no son universales entre motores y sistemas de 12/24 V.</div>
       <div class="help-item"><b>Verificaciones previas.</b> Combustible, refrigerante y aceite se registran aparte porque son condiciones de inspección y no variables dinámicas equivalentes a RPM, presión o temperatura.</div>
     `
   },
   subita:{
     title:'Ayuda · Carga súbita',
     body:`
-      <div class="help-item"><b>Carga súbita.</b> Aplicación o retiro rápido de un escalón de carga para observar la respuesta transitoria del generador.</div>
+      <div class="help-item"><b>Carga súbita.</b> Aplicación o retiro rápido de un escalón de carga para observar la respuesta transitoria del generador. Registra el porcentaje inicial y final para dejar documentado el tamaño real del escalón.</div>
       <div class="help-item"><b>Mínimo voltaje transitorio.</b> Menor tensión registrada inmediatamente después de aplicar el escalón.</div>
       <div class="help-item"><b>Recuperación.</b> Tiempo requerido para volver a la banda de estabilidad definida por la clase de desempeño o por el fabricante.</div>
       <div class="help-item"><b>ISO 8528-5.</b> La norma utiliza clases de desempeño; no existe un único límite válido para todos los grupos. Selecciona la clase declarada o usa la referencia contractual/fabricante.</div>
@@ -414,6 +414,7 @@ const val = sel => (document.querySelector(sel)?.value||"").trim();
 const g = id => val('#'+id);
 const cargaV = k => val(`[data-carga="${k}"]`);
 const paramV = k => val(`[data-param="${k}"]`);
+const paramLim = k => val(`[data-paramlim="${k}"]`);
 const checkV = k => val(`[data-check="${k}"]`);
 const subV = k => val(`[data-sub="${k}"]`);
 const segV = k => document.querySelector(`[data-seg="${k}"]`)?.dataset.val||"";
@@ -424,6 +425,12 @@ const firmaN = k => val(`[data-firma="${k}-nombre"]`);
 // ============================================================
 function generarPDF(){
  try{
+  if(!g('firmaEndress')){
+    alert('Antes de generar el PDF indica si participa un representante de marca Endress.');
+    showStep(STEPS.length-1);
+    setTimeout(()=>document.getElementById('firmaEndress')?.focus(),150);
+    return;
+  }
   if(!window.jspdf || !window.jspdf.jsPDF){
     alert('La librería del PDF no cargó. Verifica tu conexión a internet e intenta de nuevo. Tus datos siguen guardados.');
     return;
@@ -459,7 +466,7 @@ function generarPDF(){
   bandaTitulo(30,'DATOS GENERALES DEL EQUIPO',AZUL2);
   const gd = [
     ['Cliente / Sitio:', g('cliente'), 'Frecuencia Nominal (Hz):', g('frecuencia')],
-    ['No. de Reporte:', g('reporte'), 'Corriente Nominal Cos 0.8 (A):', g('corriente')],
+    ['No. de Reporte:', g('reporte'), 'Corriente Nominal (A):', g('corriente')],
     ['Fecha de Prueba:', g('fecha'), 'Motor (Marca / Modelo):', g('motor')],
     ['Técnico Responsable:', g('tecnico'), 'Alternador:', g('alternador')],
     ['No. de Serie Generador:', g('serie'), 'Controlador / Panel:', g('controlador')],
@@ -478,7 +485,7 @@ function generarPDF(){
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.3);
   doc.text('PRUEBAS CON CARGA – BANCO RESISTIVO (FP≈1)  |  Registrar valores y tiempos reales · Límites según fabricante / criterio aprobado', W/2, y+4, {align:'center'});
 
-  const cargaHead = [['CONDICIÓN DE PRUEBA','TIEMPO\nPASO (s)','VOLTAJE\nL-L (V)','CORR.\nL1 (A)','CORR.\nL2 (A)','CORR.\nL3 (A)','POTENCIA\n(kW)','FREC.\n(Hz)','RPM','PRESIÓN\nACEITE (bar)','TEMP.\nAGUA (°C)','OBSERVACIONES']];
+  const cargaHead = [['CONDICIÓN DE PRUEBA','TIEMPO\nREAL (s)','VOLTAJE\nL-L (V)','CORR.\nL1 (A)','CORR.\nL2 (A)','CORR.\nL3 (A)','POTENCIA\n(kW)','FREC.\n(Hz)','RPM','PRESIÓN\nACEITE (bar)','TEMP.\nAGUA (°C)','OBSERVACIONES']];
   const cargaBody = CARGA_ROWS.map(r=>[
     r.c, cargaV(`${r.k}-t`), cargaV(`${r.k}-v`), cargaV(`${r.k}-l1`), cargaV(`${r.k}-l2`), cargaV(`${r.k}-l3`),
     cargaV(`${r.k}-kw`), cargaV(`${r.k}-hz`), cargaV(`${r.k}-rpm`), cargaV(`${r.k}-bar`), cargaV(`${r.k}-temp`), cargaV(`${r.k}-obs`)
@@ -496,7 +503,7 @@ function generarPDF(){
 
   bandaTitulo(22,'PARÁMETROS DE MOTOR',AZUL2,colL,colLW,9);
   const paramHead=[['PARÁMETRO','MÍN','MÁX','LECT. 1','LECT. 2','LECT. 3']];
-  const paramBody=PARAMS.map(p=>[p.n,p.min,p.max,paramV(`${p.k}-1`),paramV(`${p.k}-2`),paramV(`${p.k}-3`)]);
+  const paramBody=PARAMS.map(p=>[p.n,paramLim(`${p.k}-min`),paramLim(`${p.k}-max`),paramV(`${p.k}-1`),paramV(`${p.k}-2`),paramV(`${p.k}-3`)]);
   doc.autoTable({
     startY:30, margin:{left:colL}, tableWidth:colLW, head:paramHead, body:paramBody, theme:'grid',
     headStyles:{fillColor:AZUL,textColor:[255,255,255],fontSize:6.4,halign:'center'},
@@ -548,6 +555,7 @@ function generarPDF(){
   bandaTitulo(rightY,'CRITERIO DE ACEPTACIÓN APLICADO',AZUL2,colR,colRW,7.5);
   const critBody=[
     ['Clase / criterio:',g('isoClase')||'No especificado'],
+    ['Escalón de carga:',`${g('cargaInicial')||'—'}% → ${g('cargaFinal')||'—'}%`],
     ['Referencia fabricante / contractual:',g('criterioRef')||'—'],
     ['Criterio de evaluación:','Aplicar límites de la clase/documento seleccionado'],
     ['RESULTADO CARGA SÚBITA:',state.dict.subita||'—']
@@ -557,7 +565,7 @@ function generarPDF(){
     styles:{fontSize:6.6,cellPadding:1.2,lineColor:[217,222,230],lineWidth:0.1},
     columnStyles:{0:{fontStyle:'bold',fillColor:GRIS,cellWidth:60},1:{halign:'center'}},
     didParseCell:d=>{
-      if(d.row.index===3&&d.column.index===1){
+      if(d.row.index===4&&d.column.index===1){
         d.cell.styles.fontStyle='bold';
         if(d.cell.raw==='APROBADO'){d.cell.styles.fillColor=VERDE;d.cell.styles.textColor=[255,255,255];}
         else if(d.cell.raw==='RECHAZADO'){d.cell.styles.fillColor=ROJO;d.cell.styles.textColor=[255,255,255];}
@@ -642,6 +650,7 @@ function recolectarEstado(){
   document.querySelectorAll('input,textarea,select').forEach(el=>{
     const key = el.id || el.dataset.carga && ('carga:'+el.dataset.carga)
       || el.dataset.param && ('param:'+el.dataset.param)
+      || el.dataset.paramlim && ('paramlim:'+el.dataset.paramlim)
       || el.dataset.check && ('check:'+el.dataset.check)
       || el.dataset.sub && ('sub:'+el.dataset.sub)
       || el.dataset.firma && ('firma:'+el.dataset.firma);
@@ -708,7 +717,8 @@ function restaurar(){
         else if(m && m[2]==='1' && m[1]==='7') el=document.querySelector('[data-check="coolant-v"]');
         else if(m && m[2]==='1' && m[1]==='8') el=document.querySelector('[data-check="oil-v"]');
       }
-    }else if(key.startsWith('check:')) el=document.querySelector(`[data-check="${key.slice(6)}"]`);
+    }else if(key.startsWith('paramlim:')) el=document.querySelector(`[data-paramlim="${key.slice(9)}"]`);
+    else if(key.startsWith('check:')) el=document.querySelector(`[data-check="${key.slice(6)}"]`);
     else if(key.startsWith('sub:')) el=document.querySelector(`[data-sub="${key.slice(4)}"]`);
     else if(key.startsWith('firma:')) el=document.querySelector(`[data-firma="${key.slice(6)}"]`);
     else el=document.getElementById(key);
