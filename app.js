@@ -680,9 +680,7 @@ function restaurar(){
         else if(m && m[2]==='1' && m[1]==='7') el=document.querySelector('[data-check="coolant-v"]');
         else if(m && m[2]==='1' && m[1]==='8') el=document.querySelector('[data-check="oil-v"]');
       }
-
-    else if(key.startsWith('check:')) el=document.querySelector(`[data-check="${key.slice(6)}"]`);
-    else if(key.startsWith('sub:')) el=document.querySelector(`[data-sub="${key.slice(4)}"]`);
+    }else if(key.startsWith('check:')) el=document.querySelector(`[data-check="${key.slice(6)}"]`);
     else if(key.startsWith('firma:')) el=document.querySelector(`[data-firma="${key.slice(6)}"]`);
     else el=document.getElementById(key);
     if(el) el.value=value;
