@@ -273,6 +273,7 @@ const HELP = {
     body:`
       <div class="help-item"><b>Objetivo.</b> Comparar el comportamiento del motor al iniciar una carga sostenida y después de 30 minutos o más, en lugar de repetir lecturas sin contexto.</div>
       <div class="help-item"><b>Carga continua aplicada.</b> Registra el porcentaje real de carga que se mantuvo durante el periodo de observación.</div>
+      <div class="help-item"><b>Corriente y potencia.</b> Registra el amperaje y los kW reales sostenidos durante la prueba para relacionar cualquier cambio del motor con el esfuerzo aplicado.</div>
       <div class="help-item"><b>Tiempo bajo carga.</b> Captura los minutos reales transcurridos. Para esta comparación se busca una permanencia de 30 min o más.</div>
       <div class="help-item"><b>Inicio / después de ≥30 min.</b> Registra las lecturas reales del mismo parámetro en ambos momentos para poder observar tendencia.</div>
       <div class="help-item"><b>Δ Cambio.</b> Se calcula automáticamente como lectura final menos lectura inicial. Es una comparación, no un criterio automático de aprobación.</div>
@@ -478,10 +479,15 @@ function generarPDF(){
 
   bandaTitulo(22,'PARÁMETROS DE MOTOR CON CARGA CONTINUA',AZUL2,colL,colLW,9);
   const cargaContPct=g('cargaContinuaPct')||'—';
+  const cargaContA=g('cargaContinuaA')||'—';
+  const cargaContKw=g('cargaContinuaKw')||'—';
   const cargaContMin=g('cargaContinuaMin')||'—';
   doc.autoTable({
     startY:30, margin:{left:colL,right:4}, tableWidth:colLW,
-    body:[['Carga continua aplicada:',cargaContPct+' %','Tiempo bajo carga:',cargaContMin+' min']],
+    body:[
+      ['Carga continua aplicada:',cargaContPct+' %','Corriente sostenida:',cargaContA+' A'],
+      ['Potencia sostenida:',cargaContKw+' kW','Tiempo bajo carga:',cargaContMin+' min']
+    ],
     theme:'grid',
     styles:{fontSize:7,cellPadding:1.2,lineColor:[217,222,230],lineWidth:0.1},
     columnStyles:{0:{fontStyle:'bold',fillColor:GRIS,cellWidth:52},1:{halign:'center',cellWidth:40},2:{fontStyle:'bold',fillColor:GRIS,cellWidth:52},3:{halign:'center'}}
@@ -608,7 +614,6 @@ function recolectarEstado(){
   document.querySelectorAll('input,textarea,select').forEach(el=>{
     const key = el.id || el.dataset.carga && ('carga:'+el.dataset.carga)
       || el.dataset.param && ('param:'+el.dataset.param)
-      || el.dataset.paramlim && ('paramlim:'+el.dataset.paramlim)
       || el.dataset.check && ('check:'+el.dataset.check)
       || el.dataset.sub && ('sub:'+el.dataset.sub)
       || el.dataset.firma && ('firma:'+el.dataset.firma);
