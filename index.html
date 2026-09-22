@@ -218,22 +218,16 @@
           <div class="guide-note"><b>No seleccionar la clase solo por el tipo de instalación.</b> Debe confirmarse en la ficha técnica, documentación del fabricante, contrato o plan de pruebas. La clase también depende del escalón de carga aplicado.</div>
         </div>
       </details>
-      <div class="grid2">
-        <div>
-          <label>Clase de desempeño / criterio aplicable</label>
-          <select id="isoClase">
-            <option value="">Seleccionar criterio</option>
-            <option value="ISO 8528-5 G1">ISO 8528-5 · G1</option>
-            <option value="ISO 8528-5 G2">ISO 8528-5 · G2</option>
-            <option value="ISO 8528-5 G3">ISO 8528-5 · G3</option>
-            <option value="ISO 8528-5 G4">ISO 8528-5 · G4</option>
-            <option value="Según fabricante / contrato">Según fabricante / contrato</option>
-          </select>
-        </div>
-        <div>
-          <label>Referencia del fabricante / documento</label>
-          <input id="criterioRef" placeholder="Ej. ficha técnica, plan de pruebas, contrato...">
-        </div>
+      <div>
+        <label>Clase de desempeño / criterio aplicable</label>
+        <select id="isoClase">
+          <option value="">Seleccionar criterio</option>
+          <option value="ISO 8528-5 G1">ISO 8528-5 · G1</option>
+          <option value="ISO 8528-5 G2">ISO 8528-5 · G2</option>
+          <option value="ISO 8528-5 G3">ISO 8528-5 · G3</option>
+          <option value="ISO 8528-5 G4">ISO 8528-5 · G4</option>
+          <option value="Según fabricante / contrato">Según fabricante / contrato</option>
+        </select>
       </div>
       <div class="grid2">
         <div>
@@ -246,12 +240,17 @@
         </div>
       </div>
       <p class="hint">Los límites transitorios no son universales: dependen de la clase de desempeño declarada, del tamaño real del escalón de carga y de la documentación del fabricante.</p>
+      <div class="crit" style="margin-bottom:10px">
+        <b>Cómo llenar la tabla:</b> captura <b>números medidos</b>, no “OK”. 
+        <b>Tiempo (s)</b> son segundos transcurridos desde el evento correspondiente: aplicación de carga o retiro de carga. 
+        “Antes de aplicar carga” inicia en <b>0 s</b>. Voltaje, frecuencia, corriente y RPM deben ser valores numéricos; usa “Observaciones” para comentarios.
+      </div>
       <div class="tabla-wrap">
         <table class="carga">
           <thead>
             <tr>
               <th class="cond">Instante / Condición</th>
-              <th>T (s)</th><th>Voltaje (V)</th><th>Frec. (Hz)</th>
+              <th>Tiempo desde evento (s)</th><th>Voltaje (V)</th><th>Frec. (Hz)</th>
               <th>Corr. (A)</th><th>RPM</th><th>Observaciones</th>
             </tr>
           </thead>
